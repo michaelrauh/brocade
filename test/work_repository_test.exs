@@ -22,8 +22,8 @@ defmodule WorkRepositoryTest do
 
   test "adding two of the same size keeps them separate" do
     repo = WorkRepository.start()
-    repo = WorkRepository.add(repo, Work.new(1, ["foo", "bar"]))
     repo = WorkRepository.add(repo, Work.new(1, ["other", "bar"]))
+    repo = WorkRepository.add(repo, Work.new(1, ["foo", "bar"]))
 
     {:ok, smallest, largest, repo} = WorkRepository.get_largest_and_smallest(repo)
     assert smallest == %Work{size: 1, contents: ["other", "bar"]}
@@ -51,7 +51,6 @@ defmodule WorkRepositoryTest do
     repo = WorkRepository.complete(repo, smallest, largest, Work.new(3, ["quux"]))
 
     assert repo.in_process == []
-    assert :gb_trees.to_list(repo.tree) == [{3, [%Work{size: 3, contents: ["quux"]}]}]
-    assert repo.tree == {1, {3, [%Work{size: 3, contents: ["quux"]}], nil, nil}}
+    assert WorkRepository.get_largest_and_smallest(repo) == {:same, %Work{size: 3, contents: ["quux"]}, repo}
   end
 end

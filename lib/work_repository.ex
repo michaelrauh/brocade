@@ -61,19 +61,9 @@ defmodule WorkRepository do
   def start(), do: %WorkRepository{}
 
   def add(%WorkRepository{tree: tree} = repo, %Work{size: size} = work) do
-    updated_tree =
-      case :gb_trees.lookup(size, tree) do
-        {:value, works} ->
-          if work in works do
-            tree
-          else
-            :gb_trees.update(size, [work | works], tree)
-          end
-
-        :none ->
-          :gb_trees.insert(size, [work], tree)
-      end
-
+    id = System.unique_integer([:monotonic])
+    key = {size, id}
+    updated_tree = :gb_trees.insert(key, work, tree)
     %{repo | tree: updated_tree}
   end
 
@@ -83,58 +73,15 @@ defmodule WorkRepository do
         {:empty, repo}
 
       1 ->
-        case :gb_trees.smallest(tree) do
-          {_key, [work]} ->
-            {:same, work, repo}
-
-          {_key, [_first, _second | _rest]} ->
-            tree
-            |> take_and_update_smallest(repo)
-            |> take_and_update_largest()
-            |> handle_multiple_results()
-        end
+        {_key, work} = :gb_trees.smallest(tree)
+        {:same, work, repo}
 
       _ ->
-        tree
-        |> take_and_update_smallest(repo)
-        |> take_and_update_largest()
-        |> handle_multiple_results()
+        {_smallest_key, smallest, tree1} = :gb_trees.take_smallest(tree)
+        {_largest_key, largest, updated_tree} = :gb_trees.take_largest(tree1)
+        repo = %WorkRepository{repo | tree: updated_tree, in_process: [{smallest, largest} | repo.in_process]}
+        {:ok, smallest, largest, repo}
     end
-  end
-
-  defp take_and_update_smallest(tree, repo) do
-    {_key, [smallest | _rest], updated_tree} =
-      case :gb_trees.take_smallest(tree) do
-        {key, [smallest], new_tree} ->
-          {key, [smallest], new_tree}
-
-        {key, [smallest | rest], new_tree} ->
-          if rest == [] do
-            {key, [smallest | rest], :gb_trees.delete(key, new_tree)}
-          else
-            {key, [smallest | rest], :gb_trees.insert(key, rest, new_tree)}
-          end
-      end
-
-    {smallest, %WorkRepository{repo | tree: updated_tree}}
-  end
-
-  defp take_and_update_largest({smallest, %WorkRepository{tree: tree} = repo}) do
-    {_key, [largest | _remaining], updated_tree} =
-      case :gb_trees.take_largest(tree) do
-        {key, [largest], new_tree} ->
-          {key, [largest], new_tree}
-
-        {key, [largest | rest], new_tree} ->
-          {key, [largest | rest], :gb_trees.update(key, rest, new_tree)}
-      end
-
-    {smallest, largest, %WorkRepository{repo | tree: updated_tree}}
-  end
-
-  defp handle_multiple_results({smallest, largest, repo}) do
-    repo = %WorkRepository{repo | in_process: [{smallest, largest} | repo.in_process]}
-    {:ok, smallest, largest, repo}
   end
 
   def complete(repo, smallest, largest, additional) do
