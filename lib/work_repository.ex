@@ -84,10 +84,15 @@ defmodule WorkRepository do
 
       1 ->
         case :gb_trees.smallest(tree) do
-        {_key, [work]} -> {:same, work, repo}
-        {_key, [first, second | _rest]} -> handle_multiple_results({first, second, repo})
-        end
+          {_key, [work]} ->
+            {:same, work, repo}
 
+          {_key, [_first, _second | _rest]} ->
+            tree
+            |> take_and_update_smallest(repo)
+            |> take_and_update_largest()
+            |> handle_multiple_results()
+        end
 
       _ ->
         tree
