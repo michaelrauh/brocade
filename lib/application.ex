@@ -13,7 +13,7 @@ defmodule Brocade.Application do
       {Ingestor, []}
     ]
 
-    opts = [strategy: :one_for_one, name: Brocade.Supervisor]
+    opts = [strategy: :one_for_one]
     Supervisor.start_link(children, opts)
   end
 end

@@ -11,9 +11,7 @@ defmodule WorkRepositoryServer do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  def start do
-    start_link([])
-  end
+  def clear_and_stop, do: GenServer.call(__MODULE__, :clear_and_stop)
 
   def add(work), do: GenServer.cast(__MODULE__, {:add, work})
 
@@ -55,15 +53,21 @@ defmodule WorkRepositoryServer do
   @impl true
   def handle_call(:get_largest_and_smallest, _from, repo) do
     case WorkRepository.get_largest_and_smallest(repo) do
-      {:empty, updated_repo} ->
-        {:reply, {:empty}, updated_repo}
-
-      {:same, work, updated_repo} ->
-        {:reply, {:same, work}, updated_repo}
-
       {:ok, smallest, largest, updated_repo} ->
         {:reply, {:ok, smallest, largest}, updated_repo}
+      {:same, work, updated_repo} ->
+        {:reply, {:same, work}, updated_repo}
+      {:empty, updated_repo} ->
+        {:reply, {:empty}, updated_repo}
     end
+  end
+
+  @impl true
+  def handle_call(:clear_and_stop, _from, _state) do
+    if File.exists?(@persist_file) do
+      File.rm!(@persist_file)
+    end
+    {:stop, :normal, :ok, %{}}
   end
 
   @impl true

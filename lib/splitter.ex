@@ -32,7 +32,6 @@ defmodule Splitter do
       ]
   """
 
-  # Private function to process input into raw splines
   defp split_sentences(input) do
     input
     |> String.split(~r/[?!;:.]+/)
@@ -43,13 +42,11 @@ defmodule Splitter do
     |> Enum.map(&String.split/1)
   end
 
-  # Public function for filtered splines (sentences with more than 2 words)
   def splines(input) do
     split_sentences(input)
     |> Enum.reject(&(length(&1) <= 2))
   end
 
-  # Public function for lines (sliding windows of size 2)
   def lines(input) do
     split_sentences(input)
     |> Enum.flat_map(&Enum.chunk_every(&1, 2, 1, :discard))
