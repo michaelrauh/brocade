@@ -82,27 +82,18 @@ defmodule WorkRepository do
       0 ->
         {:empty, repo}
 
-      _ ->
-        case extract_one_object(tree) do
-          {:one, work} ->
-            {:same, work, repo}
-
-          :multiple ->
-            tree
-            |> take_and_update_smallest(repo)
-            |> take_and_update_largest()
-            |> handle_multiple_results()
+      1 ->
+        case :gb_trees.smallest(tree) do
+        {_key, [work]} -> {:same, work, repo}
+        {_key, [first, second | _rest]} -> handle_multiple_results({first, second, repo})
         end
-    end
-  end
 
-  defp extract_one_object(tree) do
-    case :gb_trees.to_list(tree) do
-      [{_key, [work]}] ->
-        {:one, work}
 
       _ ->
-        :multiple
+        tree
+        |> take_and_update_smallest(repo)
+        |> take_and_update_largest()
+        |> handle_multiple_results()
     end
   end
 
