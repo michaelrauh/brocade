@@ -11,11 +11,17 @@ defmodule OrthoTest do
       # e f (0, 0, 1) (0, 1, 1)
       # g h (1, 0, 1) (1, 1, 1)
     ortho = Ortho.new(Pair.new("a", "b"))
-    assert Ortho.next_position(ortho) == {1, 0}
+    {pos, ortho} = Ortho.next_position(ortho)
+    assert pos == {1, 0}
     {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("a", "c"))
-    assert Ortho.next_position(ortho) == {1, 1}
+    {pos, ortho} = Ortho.next_position(ortho)
+    assert pos == {1, 1}
     {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("b", "d"))
-    assert Ortho.next_position(ortho) == {0, 0, 1}
+    {pos, ortho} = Ortho.next_position(ortho)
+    assert pos == {0, 0, 1}
+    {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("a", "e"))
+    {pos, ortho} = Ortho.next_position(ortho)
+    assert pos == {0, 1, 1}
   end
 
   # test "an ortho may add a pair to a slot if it passes the rules" do
