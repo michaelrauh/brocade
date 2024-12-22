@@ -3,12 +3,16 @@ defmodule CounterTest do
 
   alias Counter
 
-  test "can be incremented" do
+  test "skips the first couple" do
     counter = Counter.new()
     {current, counter} = Counter.increment(counter)
-    assert current == [0, 0]
+    assert current == [1, 0]
     {current, counter} = Counter.increment(counter)
-    assert current == [0, 1]
+    assert current == [1, 1]
+  end
+
+  test "can be incremented" do
+    counter = Counter.new()
     {current, counter} = Counter.increment(counter)
     assert current == [1, 0]
     {current, counter} = Counter.increment(counter)
@@ -17,8 +21,6 @@ defmodule CounterTest do
 
   test "can be incremented past the end" do
     counter = Counter.new()
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
     {current, counter} = Counter.increment(counter)
     {current, counter} = Counter.increment(counter)
     {current, counter} = Counter.increment(counter)
@@ -33,8 +35,6 @@ defmodule CounterTest do
     {current, counter} = Counter.increment(counter)
     {current, counter} = Counter.increment(counter)
     {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
     assert current == [0, 0, 0]
     {current, counter} = Counter.increment(counter)
     assert current == [0, 0, 1]
@@ -45,4 +45,5 @@ defmodule CounterTest do
     {current, counter} = Counter.increment(counter)
     assert current == [0, 1, 1]
   end
+
 end

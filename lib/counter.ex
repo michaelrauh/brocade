@@ -1,5 +1,5 @@
 defmodule Counter do
-  defstruct shape: [2, 2], options: Enum.sort(Utils.cartesian_product([2, 2]))
+  defstruct shape: [2, 2], options: Enum.sort(Utils.cartesian_product([2, 2])) -- [[0, 0], [0, 1]]
 
   def new() do
     %Counter{}
