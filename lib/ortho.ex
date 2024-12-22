@@ -16,19 +16,25 @@ defmodule Ortho do
     ranges = for dim <- Tuple.to_list(shape), do: 0..(dim - 1)
     possibles = cartesian_product(ranges)
     positions = Map.keys(grid)
+
     case List.first(possibles -- positions) do
       nil ->
         {pos, updated_ortho} = expand_shape_and_get_first_position(ortho)
         {pos, updated_ortho}
-      pos -> {pos, ortho}
+
+      pos ->
+        {pos, ortho}
     end
   end
 
   defp expand_shape_and_get_first_position(%Ortho{grid: grid, shape: shape}) do
     new_shape = Tuple.append(shape, 2)
-    updated_grid = Enum.into(grid, %{}, fn {key, value} ->
-      {Tuple.append(key, 0), value}
-    end)
+
+    updated_grid =
+      Enum.into(grid, %{}, fn {key, value} ->
+        {Tuple.append(key, 0), value}
+      end)
+
     ranges = for dim <- Tuple.to_list(new_shape), do: 0..(dim - 1)
     possibles = cartesian_product(ranges)
     new_ortho = %Ortho{grid: updated_grid, shape: new_shape}

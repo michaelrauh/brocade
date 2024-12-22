@@ -55,8 +55,10 @@ defmodule WorkRepositoryServer do
     case WorkRepository.get_largest_and_smallest(repo) do
       {:ok, smallest, largest, updated_repo} ->
         {:reply, {:ok, smallest, largest}, updated_repo}
+
       {:same, work, updated_repo} ->
         {:reply, {:same, work}, updated_repo}
+
       {:empty, updated_repo} ->
         {:reply, {:empty}, updated_repo}
     end
@@ -67,6 +69,7 @@ defmodule WorkRepositoryServer do
     if File.exists?(@persist_file) do
       File.rm!(@persist_file)
     end
+
     {:stop, :normal, :ok, %{}}
   end
 

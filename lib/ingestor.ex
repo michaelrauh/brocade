@@ -34,6 +34,7 @@ defmodule Ingestor do
       IO.puts("Adding line to server: #{line}")
       WorkRepositoryServer.add(Work.new(1, line))
     end)
+
     {:noreply, state}
   end
 end

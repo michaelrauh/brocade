@@ -79,7 +79,13 @@ defmodule WorkRepository do
       _ ->
         {_smallest_key, smallest, tree1} = :gb_trees.take_smallest(tree)
         {_largest_key, largest, updated_tree} = :gb_trees.take_largest(tree1)
-        repo = %WorkRepository{repo | tree: updated_tree, in_process: [{smallest, largest} | repo.in_process]}
+
+        repo = %WorkRepository{
+          repo
+          | tree: updated_tree,
+            in_process: [{smallest, largest} | repo.in_process]
+        }
+
         {:ok, smallest, largest, repo}
     end
   end

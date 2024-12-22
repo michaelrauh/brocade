@@ -51,7 +51,9 @@ defmodule WorkRepositoryTest do
     repo = WorkRepository.complete(repo, smallest, largest, Work.new(3, ["quux"]))
 
     assert repo.in_process == []
-    assert WorkRepository.get_largest_and_smallest(repo) == {:same, %Work{size: 3, contents: ["quux"]}, repo}
+
+    assert WorkRepository.get_largest_and_smallest(repo) ==
+             {:same, %Work{size: 3, contents: ["quux"]}, repo}
   end
 
   # test it does not save duplicates

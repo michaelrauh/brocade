@@ -4,12 +4,12 @@ defmodule OrthoTest do
   alias Ortho
 
   test "an ortho can get the next relevant position" do
-      # a-b (0, 0, 0) (0, 1, 0)
-      # |
-      # c-d (1, 0, 0) (1, 1, 0)
+    # a-b (0, 0, 0) (0, 1, 0)
+    # |
+    # c-d (1, 0, 0) (1, 1, 0)
 
-      # e f (0, 0, 1) (0, 1, 1)
-      # g h (1, 0, 1) (1, 1, 1)
+    # e f (0, 0, 1) (0, 1, 1)
+    # g h (1, 0, 1) (1, 1, 1)
     ortho = Ortho.new(Pair.new("a", "b"))
     {pos, ortho} = Ortho.next_position(ortho)
     assert pos == {1, 0}
