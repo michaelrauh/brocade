@@ -3,47 +3,29 @@ defmodule CounterTest do
 
   alias Counter
 
-  test "skips the first couple" do
+  test "can be incremented, skipping the first two and all already visited while increasing dimensionality" do
     counter = Counter.new()
     {current, counter} = Counter.increment(counter)
+    # first after [0, 0], [0, 1]
     assert current == [1, 0]
     {current, counter} = Counter.increment(counter)
     assert current == [1, 1]
-  end
-
-  test "can be incremented" do
-    counter = Counter.new()
     {current, counter} = Counter.increment(counter)
-    assert current == [1, 0]
-    {current, counter} = Counter.increment(counter)
-    assert current == [1, 1]
-  end
-
-  test "can be incremented past the end" do
-    counter = Counter.new()
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
-    assert current == [0, 0, 0]
-    {current, counter} = Counter.increment(counter)
-    assert current == [0, 0, 1]
-  end
-
-
-  test "increments in distance shell order then by position order" do
-    counter = Counter.new()
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
-    {current, counter} = Counter.increment(counter)
-    assert current == [0, 0, 0]
-    {current, counter} = Counter.increment(counter)
-    assert current == [0, 0, 1]
-    {current, counter} = Counter.increment(counter)
-    assert current == [0, 1, 0]
-    {current, counter} = Counter.increment(counter)
+    # first in the next dimension after skipping first layer
     assert current == [1, 0, 0]
     {current, counter} = Counter.increment(counter)
-    assert current == [0, 1, 1]
+    assert current == [1, 0, 1]
+    {current, counter} = Counter.increment(counter)
+    assert current == [1, 1, 0]
+    {current, counter} = Counter.increment(counter)
+    assert current == [1, 1, 1]
+    {current, counter} = Counter.increment(counter)
+    assert current == [1, 0, 0, 0]
   end
 
+  # a b (0 0) (0 1)  | (0 0 0) (0 0 1)
+  # c d (1 0) (1 1)  | (0 1 0) (0 1 1)
+
+  # e f              | (1 0 0) (1 0 1)
+  # g h              | (1 1 0) (1 1 1)
 end
