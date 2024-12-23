@@ -3,32 +3,17 @@ defmodule OrthoTest do
 
   alias Ortho
 
-  test "an ortho can get the next relevant position" do
-    # a-b (0, 0, 0) (0, 1, 0)
-    # |
-    # c-d (1, 0, 0) (1, 1, 0)
-
-    # e f (0, 0, 1) (0, 1, 1)
-    # g h (1, 0, 1) (1, 1, 1)
+  test "an ortho may be initialized with a pair" do
     ortho = Ortho.new(Pair.new("a", "b"))
-    {pos, ortho} = Ortho.next_position(ortho)
-    assert pos == {1, 0}
-    {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("a", "c"))
-    {pos, ortho} = Ortho.next_position(ortho)
-    assert pos == {1, 1}
-    {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("b", "d"))
-    {pos, ortho} = Ortho.next_position(ortho)
-    assert pos == {0, 0, 1}
-    {:ok, ortho} = Ortho.add_pair(ortho, Pair.new("a", "e"))
-    {pos, ortho} = Ortho.next_position(ortho)
-    assert pos == {0, 1, 1}
+    IO.inspect(ortho.grid)
+    assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
   end
 
-  # test "an ortho may add a pair to a slot if it passes the rules" do
-  #   ortho = Ortho.new(Pair.new("a", "b"))
-  #   {status, _} = Ortho.add_pair(ortho, Pair.new("a", "c"), MapSet.new())
-  #   assert status == :ok
-  # end
+  test "an ortho may add a pair" do
+    ortho = Ortho.new(Pair.new("a", "b"))
+    ortho = Ortho.add_pair(ortho, Pair.new("a", "c"))
+    assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b", [1, 0] => "c"}
+  end
 
   # test "an ortho may fail to add a pair if it doesnt have the right forwards" do
   #   ortho = Ortho.new(Pair.new("a", "b"))
