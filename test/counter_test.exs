@@ -6,12 +6,10 @@ defmodule CounterTest do
   test "can be incremented, skipping the first two and all already visited while increasing dimensionality" do
     counter = Counter.new()
     {current, counter} = Counter.increment(counter)
-    # first after [0, 0], [0, 1]
     assert current == [1, 0]
     {current, counter} = Counter.increment(counter)
     assert current == [1, 1]
     {current, counter} = Counter.increment(counter)
-    # first in the next dimension after skipping first layer
     assert current == [1, 0, 0]
     {current, counter} = Counter.increment(counter)
     assert current == [1, 0, 1]
