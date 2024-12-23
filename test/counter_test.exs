@@ -3,8 +3,12 @@ defmodule CounterTest do
 
   alias Counter
 
-  test "can be incremented, skipping the first two and all already visited while increasing dimensionality" do
+  test "can be incremented, skipping all already visited while increasing dimensionality" do
     counter = Counter.new()
+    {current, counter} = Counter.increment(counter)
+    assert current == [0, 0]
+    {current, counter} = Counter.increment(counter)
+    assert current == [0, 1]
     {current, counter} = Counter.increment(counter)
     assert current == [1, 0]
     {current, counter} = Counter.increment(counter)
@@ -17,7 +21,7 @@ defmodule CounterTest do
     assert current == [1, 1, 0]
     {current, counter} = Counter.increment(counter)
     assert current == [1, 1, 1]
-    {current, counter} = Counter.increment(counter)
+    {current, _counter} = Counter.increment(counter)
     assert current == [1, 0, 0, 0]
   end
 

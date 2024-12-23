@@ -3,16 +3,15 @@ defmodule Ortho do
 
   alias Counter
 
-  def new(%{first: first, second: second}) do
+  def new do
     %Ortho{
-      grid: %{[0, 0] => first, [0, 1] => second},
       counter: Counter.new()
     }
   end
 
-  def add_pair(%Ortho{grid: grid, counter: counter} = ortho, %Pair{second: second}) do
+  def add(%Ortho{grid: grid, counter: counter} = ortho, s) do
     {next_position, new_counter} = Counter.increment(counter)
-    new_grid = Map.put(grid, next_position, second)
+    new_grid = Map.put(grid, next_position, s)
     %Ortho{ortho | grid: new_grid, counter: new_counter}
   end
 end

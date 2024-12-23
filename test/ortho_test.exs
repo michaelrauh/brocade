@@ -3,16 +3,12 @@ defmodule OrthoTest do
 
   alias Ortho
 
-  test "an ortho may be initialized with a pair" do
-    ortho = Ortho.new(Pair.new("a", "b"))
-    IO.inspect(ortho.grid)
+  test "an ortho may add again" do
+    ortho = Ortho.new()
+    ortho = Ortho.add(ortho, "a")
+    assert ortho.grid == %{[0, 0] => "a"}
+    ortho = Ortho.add(ortho, "b")
     assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
-  end
-
-  test "an ortho may add a pair" do
-    ortho = Ortho.new(Pair.new("a", "b"))
-    ortho = Ortho.add_pair(ortho, Pair.new("a", "c"))
-    assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b", [1, 0] => "c"}
   end
 
   # test "an ortho may fail to add a pair if it doesnt have the right forwards" do
