@@ -22,11 +22,12 @@ defmodule Ortho do
     previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
     expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
 
-    if Enum.all?(expected_terms, &MapSet.member?(context, &1)) do
+    missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
+
+    if missing_pair == nil do
       new_grid = Map.put(grid, next_position, item)
       {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter}}
     else
-      missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
       {:error, missing_pair}
     end
   end
