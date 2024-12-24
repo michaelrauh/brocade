@@ -17,6 +17,14 @@ defmodule Ortho do
     |> Enum.filter(fn pos -> Enum.all?(pos, &(&1 >= 0)) end)
   end
 
+  def pad_grid(grid) do
+    grid
+    |> Enum.reduce(%{}, fn {key, value}, acc ->
+      new_key = [0 | key]
+      Map.put(acc, new_key, value)
+    end)
+  end
+
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
     diagonals =
       grid
@@ -39,6 +47,12 @@ defmodule Ortho do
     if MapSet.member?(forbidden, item) do
       {:diag, {shell, item}}
     else
+      grid = if Map.keys(grid) |> List.first([0,0]) |> Enum.count() != Enum.count(next_position) do
+        pad_grid(grid)
+      else
+        grid
+      end
+
       previous_positions = previous_positions(next_position)
       previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
       expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)

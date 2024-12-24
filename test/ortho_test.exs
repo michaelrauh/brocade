@@ -4,23 +4,17 @@ defmodule OrthoTest do
   alias Ortho
 
   test "an ortho may add again" do
-    # a b
-    # c d
+    # a b | e
+    # c d |
 
-    # e
-
-    context = MapSet.new([Pair.new("a", "b")])
+    context = MapSet.new([Pair.new("a", "b"),Pair.new("c", "d"),Pair.new("a", "c"),Pair.new("b", "d"),Pair.new("a", "e")])
 
     ortho = Ortho.new()
     {:ok, ortho} = Ortho.add(ortho, "a", context)
-    assert ortho.grid == %{[0, 0] => "a"} 
     {:ok, ortho} = Ortho.add(ortho, "b", context)
-    assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
-
-
-    # todo add several
-    # # test slots are updated on shape fill (next dimension)
-    #todo strip grid checks
+    {:ok, ortho} = Ortho.add(ortho, "c", context)
+    {:ok, ortho} = Ortho.add(ortho, "d", context)
+    {:ok, ortho} = Ortho.add(ortho, "e", context)
 
   end
 
