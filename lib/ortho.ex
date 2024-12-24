@@ -8,6 +8,7 @@ defmodule Ortho do
       counter: Counter.new()
     }
   end
+
   # todo consider calculating some of these in advance or memoizing them
 
   def previous_positions(position) do
@@ -47,11 +48,12 @@ defmodule Ortho do
     if MapSet.member?(forbidden, item) do
       {:diag, {shell, item}}
     else
-      grid = if Map.keys(grid) |> List.first([0,0]) |> Enum.count() != Enum.count(next_position) do
-        pad_grid(grid)
-      else
-        grid
-      end
+      grid =
+        if Map.keys(grid) |> List.first([0, 0]) |> Enum.count() != Enum.count(next_position) do
+          pad_grid(grid)
+        else
+          grid
+        end
 
       previous_positions = previous_positions(next_position)
       previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))

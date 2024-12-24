@@ -22,4 +22,11 @@ defmodule Splitter do
     split_sentences(input)
     |> Enum.flat_map(&Enum.chunk_every(&1, 2, 1, :discard))
   end
+
+  def vocabulary(input) do
+    input
+    |> split_sentences()
+    |> Enum.flat_map(& &1)
+    |> Enum.uniq()
+  end
 end

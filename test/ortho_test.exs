@@ -7,7 +7,14 @@ defmodule OrthoTest do
     # a b | e
     # c d |
 
-    context = MapSet.new([Pair.new("a", "b"),Pair.new("c", "d"),Pair.new("a", "c"),Pair.new("b", "d"),Pair.new("a", "e")])
+    context =
+      MapSet.new([
+        Pair.new("a", "b"),
+        Pair.new("c", "d"),
+        Pair.new("a", "c"),
+        Pair.new("b", "d"),
+        Pair.new("a", "e")
+      ])
 
     ortho = Ortho.new()
     {:ok, ortho} = Ortho.add(ortho, "a", context)
@@ -15,7 +22,6 @@ defmodule OrthoTest do
     {:ok, ortho} = Ortho.add(ortho, "c", context)
     {:ok, ortho} = Ortho.add(ortho, "d", context)
     {:ok, ortho} = Ortho.add(ortho, "e", context)
-
   end
 
   test "an ortho may fail to add a word if it doesnt have the right context" do
