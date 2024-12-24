@@ -4,6 +4,7 @@ defmodule Counter do
   def new(), do: %Counter{}
 
   def increment(%Counter{shape: shape, options: []}) do
+    # todo consider sending a signal to the caller if the new value will be more dimensions
     new_shape = [2 | shape]
 
     all_new_options =
