@@ -13,16 +13,15 @@ defmodule OrthoTest do
     assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
   end
 
-  # todo consider adding a miss explanation
-
-  # a b
-  # c d
-  # test "an ortho may fail to add a word if it doesnt have the right context" do
-  #   ortho = Ortho.new(Pair.new("a", "b"))
-
-  #   {status, _} = Ortho.add_pair(ortho, Pair.new("c", "d"), MapSet.new())
-  #   assert status == :error
-  # end
+  # todo consider adding a miss explanation to the error
+  test "an ortho may fail to add a word if it doesnt have the right context" do
+    context = MapSet.new()
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {status, remediation} = Ortho.add(ortho, "b", context)
+    assert status == :error
+    assert remediation == Pair.new("a", "b")
+  end
 
   # test "an ortho may fail to add a pair if it conflicts diagonally" do
   #   ortho = Ortho.new(Pair.new("a", "b"))

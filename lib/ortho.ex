@@ -26,7 +26,8 @@ defmodule Ortho do
       new_grid = Map.put(grid, next_position, item)
       {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter}}
     else
-      {:error, ortho}
+      missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
+      {:error, missing_pair}
     end
   end
 end
