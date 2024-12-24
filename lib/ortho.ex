@@ -9,9 +9,9 @@ defmodule Ortho do
     }
   end
 
-  def add(%Ortho{grid: grid, counter: counter} = ortho, s) do
-    {next_position, new_counter} = Counter.increment(counter)
-    new_grid = Map.put(grid, next_position, s)
+  def add(%Ortho{grid: grid, counter: counter} = ortho, item) do
+    { next_position, new_counter } = Counter.increment(counter)
+    new_grid = Map.put(grid, next_position, item)
     %Ortho{ortho | grid: new_grid, counter: new_counter}
   end
 end

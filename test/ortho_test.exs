@@ -11,7 +11,7 @@ defmodule OrthoTest do
     assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
   end
 
-  # test "an ortho may fail to add a pair if it doesnt have the right forwards" do
+  # test "an ortho may fail to add a word if it doesnt have the right context" do
   #   ortho = Ortho.new(Pair.new("a", "b"))
 
   #   {status, _} = Ortho.add_pair(ortho, Pair.new("c", "d"), MapSet.new())
