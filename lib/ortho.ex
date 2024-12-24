@@ -8,6 +8,7 @@ defmodule Ortho do
       counter: Counter.new()
     }
   end
+  # todo consider calculating some of these in advance or memoizing them
 
   def previous_positions(position) do
     position
@@ -32,10 +33,11 @@ defmodule Ortho do
       end)
 
     {next_position, new_counter} = Counter.increment(counter)
-    forbidden = Map.get(diagonals, Enum.sum(next_position), MapSet.new())
+    shell = Enum.sum(next_position)
+    forbidden = Map.get(diagonals, shell, MapSet.new())
 
     if MapSet.member?(forbidden, item) do
-      :diag
+      {:diag, {shell, item}}
     else
       previous_positions = previous_positions(next_position)
       previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
