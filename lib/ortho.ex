@@ -4,25 +4,19 @@ defmodule Ortho do
   alias Counter
 
   def new do
-    %Ortho{
-      counter: Counter.new()
-    }
+    %Ortho{counter: Counter.new()}
   end
-
-  # todo consider calculating some of these in advance or memoizing them
 
   def previous_positions(position) do
     position
     |> Enum.with_index()
-    |> Enum.map(fn {value, index} -> List.replace_at(position, index, value - 1) end)
-    |> Enum.filter(fn pos -> Enum.all?(pos, &(&1 >= 0)) end)
+    |> Enum.map(&List.replace_at(position, elem(&1, 1), elem(&1, 0) - 1))
+    |> Enum.filter(fn pos -> Enum.all?(pos, fn x -> x >= 0 end) end)
   end
 
   def pad_grid(grid) do
-    grid
-    |> Enum.reduce(%{}, fn {key, value}, acc ->
-      new_key = [0 | key]
-      Map.put(acc, new_key, value)
+    Enum.reduce(grid, %{}, fn {key, value}, acc ->
+      Map.put(acc, [0 | key], value)
     end)
   end
 
@@ -35,28 +29,25 @@ defmodule Ortho do
       {:diag, {shell, item}}
     else
       grid = optionally_pad_grid(grid, next_position)
-      missing_pair = search_for_missing_pair(grid, next_position, context, item)
-
-      if missing_pair == nil do
-        new_grid = Map.put(grid, next_position, item)
-        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
-      else
-        {:error, missing_pair}
+      case search_for_missing_pair(grid, next_position, context, item) do
+        nil ->
+          new_grid = Map.put(grid, next_position, item)
+          {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
+        missing_pair ->
+          {:error, missing_pair}
       end
     end
   end
 
   defp search_for_missing_pair(grid, next_position, context, item) do
-    previous_positions = previous_positions(next_position)
-    previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
-    expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
-
-    missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
-    missing_pair
+    previous_positions(next_position)
+    |> Enum.map(&Map.get(grid, &1))
+    |> Enum.map(&Pair.new(&1, item))
+    |> Enum.find(&not MapSet.member?(context, &1))
   end
 
   defp optionally_pad_grid(grid, next_position) do
-    if Map.keys(grid) |> List.first([0, 0]) |> Enum.count() != Enum.count(next_position) do
+    if Enum.count(List.first(Map.keys(grid), [0, 0])) != Enum.count(next_position) do
       pad_grid(grid)
     else
       grid
@@ -64,17 +55,9 @@ defmodule Ortho do
   end
 
   defp calculate_diagonals(grid) do
-    grid
-    |> Map.keys()
-    |> Enum.reduce(%{}, fn key, acc ->
+    Enum.reduce(Map.keys(grid), %{}, fn key, acc ->
       distance = Enum.sum(key)
-
-      Map.update(
-        acc,
-        distance,
-        MapSet.new([Map.get(grid, key)]),
-        &MapSet.put(&1, Map.get(grid, key))
-      )
+      Map.update(acc, distance, MapSet.new([Map.get(grid, key)]), &MapSet.put(&1, Map.get(grid, key)))
     end)
   end
 
@@ -88,7 +71,7 @@ defmodule Ortho do
         |> Enum.map(fn {pos, val} ->
           new_pos =
             Enum.with_index(pos)
-            |> Enum.sort_by(fn {_, i} -> Enum.find_index(perm, &(&1 == i)) end)
+            |> Enum.sort_by(fn {_elem, index} -> Enum.find_index(perm, fn x -> x == index end) end)
             |> Enum.map(&elem(&1, 0))
 
           {new_pos, val}

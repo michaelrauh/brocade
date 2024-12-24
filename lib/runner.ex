@@ -21,6 +21,7 @@ defmodule Runner do
   end
 
   defp process_queue(q, context, vocabulary) do
+    IO.inspect(:queue.len(q))
     case :queue.out(q) do
       {:empty, _} ->
         :ok

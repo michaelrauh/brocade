@@ -21,7 +21,7 @@ defmodule OrthoTest do
     {:ok, ortho} = Ortho.add(ortho, "b", context)
     {:ok, ortho} = Ortho.add(ortho, "c", context)
     {:ok, ortho} = Ortho.add(ortho, "d", context)
-    {:ok, ortho} = Ortho.add(ortho, "e", context)
+    {:ok, _ortho} = Ortho.add(ortho, "e", context)
   end
 
   test "orthos build in different orders may share ids" do
