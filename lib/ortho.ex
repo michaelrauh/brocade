@@ -17,18 +17,38 @@ defmodule Ortho do
   end
 
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
+    diagonals =
+      grid
+      |> Map.keys()
+      |> Enum.reduce(%{}, fn key, acc ->
+        distance = Enum.sum(key)
+
+        Map.update(
+          acc,
+          distance,
+          MapSet.new([Map.get(grid, key)]),
+          &MapSet.put(&1, Map.get(grid, key))
+        )
+      end)
+
     {next_position, new_counter} = Counter.increment(counter)
-    previous_positions = previous_positions(next_position)
-    previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
-    expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
+    forbidden = Map.get(diagonals, Enum.sum(next_position), MapSet.new())
 
-    missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
-
-    if missing_pair == nil do
-      new_grid = Map.put(grid, next_position, item)
-      {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter}}
+    if MapSet.member?(forbidden, item) do
+      :diag
     else
-      {:error, missing_pair}
+      previous_positions = previous_positions(next_position)
+      previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
+      expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
+
+      missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
+
+      if missing_pair == nil do
+        new_grid = Map.put(grid, next_position, item)
+        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter}}
+      else
+        {:error, missing_pair}
+      end
     end
   end
 end

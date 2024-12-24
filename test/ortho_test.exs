@@ -13,7 +13,6 @@ defmodule OrthoTest do
     assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
   end
 
-  # todo consider adding a miss explanation to the error
   test "an ortho may fail to add a word if it doesnt have the right context" do
     context = MapSet.new()
     ortho = Ortho.new()
@@ -23,12 +22,15 @@ defmodule OrthoTest do
     assert remediation == Pair.new("a", "b")
   end
 
-  # test "an ortho may fail to add a pair if it conflicts diagonally" do
-  #   ortho = Ortho.new(Pair.new("a", "b"))
+  test "an ortho may fail to add a pair if it conflicts diagonally" do
+    context = MapSet.new([Pair.new("a", "b")])
 
-  #   {status, _} = Ortho.add_pair(ortho, Pair.new("a", "b"), MapSet.new())
-  #   assert status == :error
-  # end
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {:ok, ortho} = Ortho.add(ortho, "b", context)
+    :diag = Ortho.add(ortho, "b", context)
+  end
+  # todo have diag give back the bad thing that it ran into - distance shell and identity
 
   # test "an ortho may need to check context and still pass" do
   #   # a-b (0, 0) (0, 1)
