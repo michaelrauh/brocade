@@ -41,7 +41,8 @@ defmodule Runner do
                 nil
             end
           end)
-          |> Enum.reject(fn x -> x == nil end) |> Enum.dedup_by(fn x -> x.id end)
+          |> Enum.reject(fn x -> x == nil end)
+          |> Enum.dedup_by(fn x -> x.id end)
 
         new_q = Enum.reduce(new_items, new_q, fn x, acc -> :queue.in(x, acc) end)
 

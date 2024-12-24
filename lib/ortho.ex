@@ -79,9 +79,11 @@ defmodule Ortho do
       for perm <- permutations do
         grid
         |> Enum.map(fn {pos, val} ->
-          new_pos = Enum.with_index(pos)
-          |> Enum.sort_by(fn {_, i} -> Enum.find_index(perm, &(&1 == i)) end)
-          |> Enum.map(&elem(&1, 0))
+          new_pos =
+            Enum.with_index(pos)
+            |> Enum.sort_by(fn {_, i} -> Enum.find_index(perm, &(&1 == i)) end)
+            |> Enum.map(&elem(&1, 0))
+
           {new_pos, val}
         end)
         |> Enum.sort()
@@ -94,6 +96,7 @@ defmodule Ortho do
   end
 
   defp permutations([]), do: [[]]
+
   defp permutations(list) do
     for x <- list, y <- permutations(list -- [x]), do: [x | y]
   end
