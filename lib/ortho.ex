@@ -27,48 +27,55 @@ defmodule Ortho do
   end
 
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
-    diagonals =
-      grid
-      |> Map.keys()
-      |> Enum.reduce(%{}, fn key, acc ->
-        distance = Enum.sum(key)
-
-        Map.update(
-          acc,
-          distance,
-          MapSet.new([Map.get(grid, key)]),
-          &MapSet.put(&1, Map.get(grid, key))
-        )
-      end)
-
     {next_position, new_counter} = Counter.increment(counter)
     shell = Enum.sum(next_position)
-    forbidden = Map.get(diagonals, shell, MapSet.new())
+    forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
 
     if MapSet.member?(forbidden, item) do
       {:diag, {shell, item}}
     else
-      grid =
-        if Map.keys(grid) |> List.first([0, 0]) |> Enum.count() != Enum.count(next_position) do
-          pad_grid(grid)
-        else
-          grid
-        end
-
-      previous_positions = previous_positions(next_position)
-      previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
-      expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
-
-      missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
+      grid = optionally_pad_grid(grid, next_position)
+      missing_pair = search_for_missing_pair(grid, next_position, context, item)
 
       if missing_pair == nil do
         new_grid = Map.put(grid, next_position, item)
-        id = calculate_id(new_grid)
-        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: id}}
+        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
       else
         {:error, missing_pair}
       end
     end
+  end
+
+  defp search_for_missing_pair(grid, next_position, context, item) do
+    previous_positions = previous_positions(next_position)
+    previous_terms = Enum.map(previous_positions, &Map.get(grid, &1))
+    expected_terms = Enum.map(previous_terms, fn term -> Pair.new(term, item) end)
+
+    missing_pair = Enum.find(expected_terms, fn term -> not MapSet.member?(context, term) end)
+    missing_pair
+  end
+
+  defp optionally_pad_grid(grid, next_position) do
+    if Map.keys(grid) |> List.first([0, 0]) |> Enum.count() != Enum.count(next_position) do
+      pad_grid(grid)
+    else
+      grid
+    end
+  end
+
+  defp calculate_diagonals(grid) do
+    grid
+    |> Map.keys()
+    |> Enum.reduce(%{}, fn key, acc ->
+      distance = Enum.sum(key)
+
+      Map.update(
+        acc,
+        distance,
+        MapSet.new([Map.get(grid, key)]),
+        &MapSet.put(&1, Map.get(grid, key))
+      )
+    end)
   end
 
   defp calculate_id(grid) do
