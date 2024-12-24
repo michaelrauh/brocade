@@ -4,13 +4,19 @@ defmodule OrthoTest do
   alias Ortho
 
   test "an ortho may add again" do
+    context = MapSet.new([Pair.new("a", "b")])
+
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
     assert ortho.grid == %{[0, 0] => "a"}
-    ortho = Ortho.add(ortho, "b")
+    {:ok, ortho} = Ortho.add(ortho, "b", context)
     assert ortho.grid == %{[0, 0] => "a", [0, 1] => "b"}
   end
 
+  # todo consider adding a miss explanation
+
+  # a b
+  # c d
   # test "an ortho may fail to add a word if it doesnt have the right context" do
   #   ortho = Ortho.new(Pair.new("a", "b"))
 
