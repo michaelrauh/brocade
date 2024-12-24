@@ -30,16 +30,16 @@ defmodule Runner do
 
         new_items =
           Enum.map(vocabulary, fn word ->
-        case Ortho.add(item, word, context) do
-          {:ok, new_item} ->
-            new_item
+            case Ortho.add(item, word, context) do
+              {:ok, new_item} ->
+                new_item
 
-          {:error, _missing_pair} ->
-            nil
+              {:error, _missing_pair} ->
+                nil
 
-          {:diag, _extra_word_in_shell} ->
-            nil
-        end
+              {:diag, _extra_word_in_shell} ->
+                nil
+            end
           end)
           |> Enum.reject(fn x -> x == nil end)
 

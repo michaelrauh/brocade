@@ -1,5 +1,5 @@
 defmodule Ortho do
-  defstruct grid: %{}, counter: nil
+  defstruct grid: %{}, counter: nil, id: nil
 
   alias Counter
 
@@ -63,10 +63,30 @@ defmodule Ortho do
 
       if missing_pair == nil do
         new_grid = Map.put(grid, next_position, item)
-        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter}}
+        id = calculate_id(new_grid)
+        {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: id}}
       else
         {:error, missing_pair}
       end
     end
+  end
+
+  defp calculate_id(grid) do
+    one_hot_positions =
+      for i <- 0..(Enum.count(List.first(Map.keys(grid))) - 1) do
+        List.replace_at(List.duplicate(0, Enum.count(List.first(Map.keys(grid)))), i, 1)
+      end
+
+    elements_with_positions =
+      one_hot_positions
+      |> Enum.map(fn pos -> {Map.get(grid, pos), pos} end)
+      |> Enum.sort_by(fn {element, pos} -> {element || :none, pos} end)
+
+    canonical_order =
+      elements_with_positions
+      |> Enum.map(fn {element, pos} -> element || pos end)
+
+    :crypto.hash(:sha256, :erlang.term_to_binary(canonical_order))
+    |> Base.encode16()
   end
 end
