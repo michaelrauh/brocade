@@ -136,4 +136,19 @@ defmodule ContextKeeperTest do
 
     ContextKeeper.stop()
   end
+
+  test "it accepts near misses mapped to the effected orthos" do
+    context = MapSet.new()
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {status, remediation} = Ortho.add(ortho, "b", context)
+    assert status == :error
+    assert remediation == Pair.new("a", "b")
+
+    ContextKeeper.add_remediations([{ortho, remediation}])
+
+    assert ContextKeeper.get_remediations() == [{ortho, remediation}]
+
+    ContextKeeper.stop()
+  end
 end

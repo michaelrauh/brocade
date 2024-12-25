@@ -2,6 +2,7 @@ defmodule ContextKeeper do
   @pair_table_name :pairs
   @vocabulary_table_name :vocabulary
   @ortho_table_name :ortho
+  @remediation_table_name :remediation
 
   # todo have this flush to disk on version update and load from disk on start
   def start do
@@ -17,6 +18,10 @@ defmodule ContextKeeper do
       :ets.new(@ortho_table_name, [:named_table, :set, :private])
     end
 
+    unless :ets.whereis(@remediation_table_name) != :undefined do
+      :ets.new(@remediation_table_name, [:named_table, :set, :private])
+    end
+
     :ok
   end
 
@@ -24,6 +29,7 @@ defmodule ContextKeeper do
     :ets.delete(@pair_table_name)
     :ets.delete(@vocabulary_table_name)
     :ets.delete(@ortho_table_name)
+    :ets.delete(@remediation_table_name)
     :ok
   end
 
@@ -52,6 +58,20 @@ defmodule ContextKeeper do
         false -> acc
       end
     end)
+  end
+
+  def add_remediations(remediations) when is_list(remediations) do
+    Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
+      case :ets.insert_new(@remediation_table_name, {{f, s}, ortho}) do
+        true -> [{ortho, remediation} | acc]
+        false -> acc
+      end
+    end)
+  end
+
+  def get_remediations() do
+    :ets.tab2list(@remediation_table_name)
+    |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
   end
 
   def get_vocabulary() do
