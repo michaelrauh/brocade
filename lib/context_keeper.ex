@@ -21,14 +21,20 @@ defmodule ContextKeeper do
   end
 
   def add_pairs(pairs) when is_list(pairs) do
-    Enum.each(pairs, fn %Pair{first: f, second: s} ->
-      :ets.insert(@pair_table_name, {f, s})
+    Enum.reduce(pairs, [], fn %Pair{first: f, second: s}, acc ->
+      case :ets.insert_new(@pair_table_name, {f, s}) do
+        true -> [%Pair{first: f, second: s} | acc]
+        false -> acc
+      end
     end)
   end
 
   def add_vocabulary(words) when is_list(words) do
-    Enum.each(words, fn word ->
-      :ets.insert(@vocabulary_table_name, {word})
+    Enum.reduce(words, [], fn word, acc ->
+      case :ets.insert_new(@vocabulary_table_name, {word}) do
+        true -> [word | acc]
+        false -> acc
+      end
     end)
   end
 
