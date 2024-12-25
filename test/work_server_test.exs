@@ -11,7 +11,7 @@ defmodule WorkServerTest do
   test "it can push and pop work", %{pid: pid} do
     :ok = WorkServer.push(pid, "one")
     :ok = WorkServer.push(pid, "two")
-    {:ok, top} = WorkServer.pop(pid)
+    {:ok, top, _version} = WorkServer.pop(pid)
     assert top == "two"
     {:ok, pid}
   end
@@ -19,7 +19,7 @@ defmodule WorkServerTest do
   test "it can push multiple though batches are reversed", %{pid: pid} do
     :ok = WorkServer.push(pid, "one")
     :ok = WorkServer.push(pid, ["two", "three"])
-    {:ok, top} = WorkServer.pop(pid)
+    {:ok, top, _version} = WorkServer.pop(pid)
     assert top == "two"
     {:ok, pid}
   end

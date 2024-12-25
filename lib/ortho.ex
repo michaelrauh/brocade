@@ -29,10 +29,12 @@ defmodule Ortho do
       {:diag, {shell, item}}
     else
       grid = optionally_pad_grid(grid, next_position)
+
       case search_for_missing_pair(grid, next_position, context, item) do
         nil ->
           new_grid = Map.put(grid, next_position, item)
           {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
+
         missing_pair ->
           {:error, missing_pair}
       end
@@ -43,7 +45,7 @@ defmodule Ortho do
     previous_positions(next_position)
     |> Enum.map(&Map.get(grid, &1))
     |> Enum.map(&Pair.new(&1, item))
-    |> Enum.find(&not MapSet.member?(context, &1))
+    |> Enum.find(&(not MapSet.member?(context, &1)))
   end
 
   defp optionally_pad_grid(grid, next_position) do
@@ -57,7 +59,13 @@ defmodule Ortho do
   defp calculate_diagonals(grid) do
     Enum.reduce(Map.keys(grid), %{}, fn key, acc ->
       distance = Enum.sum(key)
-      Map.update(acc, distance, MapSet.new([Map.get(grid, key)]), &MapSet.put(&1, Map.get(grid, key)))
+
+      Map.update(
+        acc,
+        distance,
+        MapSet.new([Map.get(grid, key)]),
+        &MapSet.put(&1, Map.get(grid, key))
+      )
     end)
   end
 

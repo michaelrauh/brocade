@@ -22,14 +22,14 @@ defmodule WorkServer do
   # Server (callbacks)
 
   def init(_init_arg) do
-    {:ok, []}
+    {:ok, {[], 0}}
   end
 
-  def handle_call({:push, work}, _from, state) do
-    {:reply, :ok, work ++ state}
+  def handle_call({:push, work}, _from, {stack, version}) do
+    {:reply, :ok, {work ++ stack, version}}
   end
 
-  def handle_call(:pop, _from, [top | rest]) do
-    {:reply, {:ok, top}, rest}
+  def handle_call(:pop, _from, {[top | rest], version}) do
+    {:reply, {:ok, top, version}, {rest, version}}
   end
 end
