@@ -13,4 +13,14 @@ defmodule ContextKeeperTest do
     assert ContextKeeper.get() == [Pair.new("a", "b"), Pair.new("c", "d")]
     ContextKeeper.stop()
   end
+
+  test "it can take multiple values at once" do
+    ContextKeeper.add([
+      Pair.new("a", "b"),
+      Pair.new("a", "b"),
+      Pair.new("c", "d")
+    ])
+    assert ContextKeeper.get() == [Pair.new("a", "b"), Pair.new("c", "d")]
+    ContextKeeper.stop()
+  end
 end

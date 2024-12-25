@@ -19,6 +19,12 @@ defmodule ContextKeeper do
     :ets.insert(@table_name, {f, s})
   end
 
+  def add(pairs) when is_list(pairs) do
+    Enum.each(pairs, fn %Pair{first: f, second: s} ->
+      :ets.insert(@table_name, {f, s})
+    end)
+  end
+
   def get() do
     :ets.tab2list(@table_name) |> Enum.map(fn {f, s} -> Pair.new(f, s) end)
   end
