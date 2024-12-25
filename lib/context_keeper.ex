@@ -22,9 +22,9 @@ defmodule ContextKeeper do
   end
 
   def add_pairs(pairs) when is_list(pairs) do
-    Enum.reduce(pairs, [], fn %Pair{first: f, second: s}, acc ->
-      case :ets.insert_new(@pair_table_name, {f, s}) do
-        true -> [%Pair{first: f, second: s} | acc]
+    Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
+      case :ets.insert_new(@pair_table_name, {{f, s}, pair}) do
+        true -> [pair | acc]
         false -> acc
       end
     end)
@@ -44,16 +44,13 @@ defmodule ContextKeeper do
   end
 
   def get_pairs() do
-    :ets.tab2list(@pair_table_name) |> Enum.map(fn {f, s} -> Pair.new(f, s) end)
+    :ets.tab2list(@pair_table_name) |> Enum.map(fn {_key, val} -> val end)
   end
 
   def get_relevant_context_for_remediations(remediations) do
     remediations
     |> Enum.filter(fn %Pair{first: f, second: s} ->
-      case :ets.lookup(@pair_table_name, f) do
-        [{^f, ^s}] -> true
-        _ -> false
-      end
+      :ets.member(@pair_table_name, {f, s})
     end)
   end
 end
