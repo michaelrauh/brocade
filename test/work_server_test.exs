@@ -44,4 +44,9 @@ defmodule WorkServerTest do
     assert version == 1
     {:ok, pid}
   end
+
+  test "it can be stopped", %{pid: pid} do
+    :ok = stop_supervised(WorkServer)
+    assert Process.alive?(pid) == false
+  end
 end
