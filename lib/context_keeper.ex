@@ -7,6 +7,7 @@ defmodule ContextKeeper do
     unless :ets.whereis(@pair_table_name) != :undefined do
       :ets.new(@pair_table_name, [:named_table, :set, :private])
     end
+
     unless :ets.whereis(@vocabulary_table_name) != :undefined do
       :ets.new(@vocabulary_table_name, [:named_table, :set, :private])
     end
@@ -44,5 +45,15 @@ defmodule ContextKeeper do
 
   def get_pairs() do
     :ets.tab2list(@pair_table_name) |> Enum.map(fn {f, s} -> Pair.new(f, s) end)
+  end
+
+  def get_relevant_context_for_remediations(remediations) do
+    remediations
+    |> Enum.filter(fn %Pair{first: f, second: s} ->
+      case :ets.lookup(@pair_table_name, f) do
+        [{^f, ^s}] -> true
+        _ -> false
+      end
+    end)
   end
 end
