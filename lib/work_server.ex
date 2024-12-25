@@ -11,6 +11,10 @@ defmodule WorkServer do
     GenServer.call(pid, {:add, work})
   end
 
+  def pop(pid) do
+    GenServer.call(pid, :pop)
+  end
+
   # Server (callbacks)
 
   def init(_init_arg) do
@@ -20,5 +24,9 @@ defmodule WorkServer do
   def handle_call({:add, work}, _from, state) do
     new_state = [work | state]
     {:reply, :ok, new_state}
+  end
+
+  def handle_call(:pop, _from, [top | rest]) do
+    {:reply, {:ok, top}, rest}
   end
 end
