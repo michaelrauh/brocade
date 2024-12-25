@@ -92,4 +92,10 @@ defmodule ContextKeeper do
       :ets.member(@pair_table_name, {f, s})
     end)
   end
+
+  def remove_remediations(remediations) do
+    Enum.each(remediations, fn %Pair{first: f, second: s} ->
+      :ets.delete(@remediation_table_name, {f, s})
+    end)
+  end
 end

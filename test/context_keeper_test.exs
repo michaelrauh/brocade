@@ -151,4 +151,23 @@ defmodule ContextKeeperTest do
 
     ContextKeeper.stop()
   end
+
+  test "it can remove remediations" do
+    context = MapSet.new()
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {status, remediation} = Ortho.add(ortho, "b", context)
+    assert status == :error
+    assert remediation == Pair.new("a", "b")
+
+    ContextKeeper.add_remediations([{ortho, remediation}])
+
+    assert ContextKeeper.get_remediations() == [{ortho, remediation}]
+
+    ContextKeeper.remove_remediations([remediation])
+
+    assert ContextKeeper.get_remediations() == []
+
+    ContextKeeper.stop()
+  end
 end
