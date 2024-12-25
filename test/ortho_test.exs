@@ -24,7 +24,7 @@ defmodule OrthoTest do
     {:ok, _ortho} = Ortho.add(ortho, "e", context)
   end
 
-  test "orthos build in different orders may share ids" do
+  test "orthos built in different orders may share ids" do
     context =
       MapSet.new([
         Pair.new("a", "b"),
