@@ -7,6 +7,10 @@ defmodule WorkServer do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  def new_version(pid) do
+    GenServer.call(pid, :new_version)
+  end
+
   def push(pid, work) when is_list(work) do
     GenServer.call(pid, {:push, work})
   end
@@ -31,5 +35,13 @@ defmodule WorkServer do
 
   def handle_call(:pop, _from, {[top | rest], version}) do
     {:reply, {:ok, top, version}, {rest, version}}
+  end
+
+  def handle_call(:pop, _from, {[], version}) do
+    {:reply, {:error, nil, version}, {[], version}}
+  end
+
+  def handle_call(:new_version, _from, {stack, version}) do
+    {:reply, :ok, {stack, version + 1}}
   end
 end
