@@ -32,7 +32,8 @@ defmodule WorkServerTest do
     {:ok, pid}
   end
 
-  test "it can be notified of version updates and subsequent work will have a different version", %{pid: pid} do
+  test "it can be notified of version updates and subsequent work will have a different version",
+       %{pid: pid} do
     {:error, nil, version} = WorkServer.pop(pid)
     assert version == 0
     :ok = WorkServer.push(pid, "one")

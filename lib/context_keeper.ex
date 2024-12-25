@@ -6,6 +6,7 @@ defmodule ContextKeeper do
     unless :ets.whereis(@table_name) != :undefined do
       :ets.new(@table_name, [:named_table, :set, :private])
     end
+
     :ok
   end
 
@@ -15,7 +16,7 @@ defmodule ContextKeeper do
   end
 
   def add(%Pair{first: f, second: s}) do
-    :ets.insert(@table_name, {f,s})
+    :ets.insert(@table_name, {f, s})
   end
 
   def get() do
