@@ -6,14 +6,6 @@ defmodule ContextKeeperTest do
     ContextKeeper.start()
   end
 
-  test "it can store a set of values which may or may not be new" do
-    ContextKeeper.add_pair(Pair.new("a", "b"))
-    ContextKeeper.add_pair(Pair.new("a", "b"))
-    ContextKeeper.add_pair(Pair.new("c", "d"))
-    assert ContextKeeper.get_pairs() == [Pair.new("a", "b"), Pair.new("c", "d")]
-    ContextKeeper.stop()
-  end
-
   test "it can take multiple values at once" do
     ContextKeeper.add_pairs([
       Pair.new("a", "b"),
@@ -21,6 +13,14 @@ defmodule ContextKeeperTest do
       Pair.new("c", "d")
     ])
     assert ContextKeeper.get_pairs() == [Pair.new("a", "b"), Pair.new("c", "d")]
+    ContextKeeper.stop()
+  end
+
+  test "it can take in vocabulary" do
+    ContextKeeper.add_vocabulary([
+      "a", "b", "b", "c"
+    ])
+    assert ContextKeeper.get_vocabulary() == ["b", "a", "c"]
     ContextKeeper.stop()
   end
 end
