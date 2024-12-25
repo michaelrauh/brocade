@@ -7,8 +7,12 @@ defmodule WorkServer do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def push(pid, work) do
+  def push(pid, work) when is_list(work) do
     GenServer.call(pid, {:push, work})
+  end
+
+  def push(pid, work) do
+    GenServer.call(pid, {:push, [work]})
   end
 
   def pop(pid) do
@@ -22,8 +26,7 @@ defmodule WorkServer do
   end
 
   def handle_call({:push, work}, _from, state) do
-    new_state = [work | state]
-    {:reply, :ok, new_state}
+    {:reply, :ok, work ++ state}
   end
 
   def handle_call(:pop, _from, [top | rest]) do
