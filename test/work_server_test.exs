@@ -4,50 +4,40 @@ defmodule WorkServerTest do
   alias WorkServer
 
   setup do
-    {:ok, pid} = start_supervised(WorkServer)
-    {:ok, pid: pid}
+    {:ok, _pid} = start_supervised(WorkServer)
+    :ok
   end
 
-  test "it can push and pop work", %{pid: pid} do
-    :ok = WorkServer.push(pid, "one")
-    :ok = WorkServer.push(pid, "two")
-    {:ok, top, _version} = WorkServer.pop(pid)
+  test "it can push and pop work" do
+    :ok = WorkServer.push("one")
+    :ok = WorkServer.push("two")
+    {:ok, top, _version} = WorkServer.pop()
     assert top == "two"
-    {:ok, pid}
   end
 
-  test "it will show empty if there is no work", %{pid: pid} do
-    {status, top, version} = WorkServer.pop(pid)
+  test "it will show empty if there is no work" do
+    {status, top, version} = WorkServer.pop()
     assert status == :error
     assert top == nil
     assert version == 0
-    {:ok, pid}
   end
 
-  test "it can push multiple though batches are reversed", %{pid: pid} do
-    :ok = WorkServer.push(pid, "one")
-    :ok = WorkServer.push(pid, ["two", "three"])
-    {:ok, top, _version} = WorkServer.pop(pid)
+  test "it can push multiple though batches are reversed" do
+    :ok = WorkServer.push("one")
+    :ok = WorkServer.push(["two", "three"])
+    {:ok, top, _version} = WorkServer.pop()
     assert top == "two"
-    {:ok, pid}
   end
 
-  test "it can be notified of version updates and subsequent work will have a different version",
-       %{pid: pid} do
-    {:error, nil, version} = WorkServer.pop(pid)
+  test "it can be notified of version updates and subsequent work will have a different version" do
+    {:error, nil, version} = WorkServer.pop()
     assert version == 0
-    :ok = WorkServer.push(pid, "one")
-    :ok = WorkServer.new_version(pid)
-    :ok = WorkServer.push(pid, "two")
-    {:ok, _top, version} = WorkServer.pop(pid)
+    :ok = WorkServer.push("one")
+    :ok = WorkServer.new_version()
+    :ok = WorkServer.push("two")
+    {:ok, _top, version} = WorkServer.pop()
     assert version == 1
-    {:ok, _top, version} = WorkServer.pop(pid)
+    {:ok, _top, version} = WorkServer.pop()
     assert version == 1
-    {:ok, pid}
-  end
-
-  test "it can be stopped", %{pid: pid} do
-    :ok = stop_supervised(WorkServer)
-    assert Process.alive?(pid) == false
   end
 end

@@ -7,20 +7,20 @@ defmodule WorkServer do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def new_version(pid) do
-    GenServer.call(pid, :new_version)
+  def new_version do
+    GenServer.call(__MODULE__, :new_version)
   end
 
-  def push(pid, work) when is_list(work) do
-    GenServer.call(pid, {:push, work})
+  def push(work) when is_list(work) do
+    GenServer.call(__MODULE__, {:push, work})
   end
 
-  def push(pid, work) do
-    GenServer.call(pid, {:push, [work]})
+  def push(work) do
+    GenServer.call(__MODULE__, {:push, [work]})
   end
 
-  def pop(pid) do
-    GenServer.call(pid, :pop)
+  def pop do
+    GenServer.call(__MODULE__, :pop)
   end
 
   # Server (callbacks)
