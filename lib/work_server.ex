@@ -1,4 +1,4 @@
-defmodule WorkServer do
+defmodule Brocade.WorkServer do
   use GenServer
 
   # Client API
