@@ -17,10 +17,8 @@ defmodule Brocade.WorkerServer do
 
   def handle_call(:process, _from, state) do
     IO.puts "Processing..."
-    Brocade.WorkServer.pop(WorkServer)
+    Brocade.WorkServer.pop(Brocade.WorkServer)
 
     {:reply, :ok, state}
   end
-
-
 end
