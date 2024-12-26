@@ -1,15 +1,16 @@
 defmodule WorkerServerTest do
-  use ExUnit.Case
-  doctest WorkerServer
+  use ExUnit.Case, async: true
+
+  alias WorkerServer
 
   setup do
-    {:ok, _pid} = WorkerServer.start_link(:worker_server, :ok)
+    {:ok, _pid} = start_supervised(WorkerServer)
+    {:ok, _pid} = start_supervised(WorkServer)
     :ok
   end
 
-  test "it starts with context version -1" do
-    assert -1 == WorkerServer.get_context_version()
+  test "it can report on version" do
+    {:ok, version} = WorkerServer.get_context_version()
+    assert version == -1
   end
-
-
 end

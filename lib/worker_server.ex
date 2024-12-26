@@ -1,19 +1,24 @@
 defmodule WorkerServer do
   use GenServer
 
-  def start_link(name, init_arg) do
-    GenServer.start_link(__MODULE__, init_arg, name: name)
+  # Client API
+
+  def start_link(_args) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
+
+  def get_context_version do
+    GenServer.call(__MODULE__, :get_context_version)
+  end
+
+  # Server (callbacks)
 
   def init(_init_arg) do
     {:ok, -1}
   end
 
-  def get_context_version() do
-    GenServer.call(:worker_server, {:get_context_version})
+  def handle_call(:get_context_version, _from, version) do
+    {:reply, {:ok, version}, version}
   end
 
-  def handle_call({:get_context_version}, _from, context_version) do
-    {:reply, context_version, context_version}
-  end
 end
