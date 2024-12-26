@@ -1,101 +1,150 @@
 defmodule ContextKeeper do
+  use GenServer
+
   @pair_table_name :pairs
   @vocabulary_table_name :vocabulary
   @ortho_table_name :ortho
   @remediation_table_name :remediation
 
-  # todo have this flush to disk on version update and load from disk on start
-  def start do
-    unless :ets.whereis(@pair_table_name) != :undefined do
-      :ets.new(@pair_table_name, [:named_table, :set, :private])
-    end
-
-    unless :ets.whereis(@vocabulary_table_name) != :undefined do
-      :ets.new(@vocabulary_table_name, [:named_table, :set, :private])
-    end
-
-    unless :ets.whereis(@ortho_table_name) != :undefined do
-      :ets.new(@ortho_table_name, [:named_table, :set, :private])
-    end
-
-    unless :ets.whereis(@remediation_table_name) != :undefined do
-      :ets.new(@remediation_table_name, [:named_table, :set, :private])
-    end
-
-    :ok
+  # Client API
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   def stop do
+    GenServer.call(__MODULE__, :stop)
+  end
+
+  def add_pairs(pairs) when is_list(pairs) do
+    GenServer.call(__MODULE__, {:add_pairs, pairs})
+  end
+
+  def add_vocabulary(words) when is_list(words) do
+    GenServer.call(__MODULE__, {:add_vocabulary, words})
+  end
+
+  def add_orthos(orthos) when is_list(orthos) do
+    GenServer.call(__MODULE__, {:add_orthos, orthos})
+  end
+
+  def add_remediations(remediations) when is_list(remediations) do
+    GenServer.call(__MODULE__, {:add_remediations, remediations})
+  end
+
+  def get_remediations() do
+    GenServer.call(__MODULE__, :get_remediations)
+  end
+
+  def get_vocabulary() do
+    GenServer.call(__MODULE__, :get_vocabulary)
+  end
+
+  def get_pairs() do
+    GenServer.call(__MODULE__, :get_pairs)
+  end
+
+  def get_orthos() do
+    GenServer.call(__MODULE__, :get_orthos)
+  end
+
+  def get_relevant_context_for_remediations(remediations) do
+    GenServer.call(__MODULE__, {:get_relevant_context_for_remediations, remediations})
+  end
+
+  def remove_remediations(remediations) do
+    GenServer.call(__MODULE__, {:remove_remediations, remediations})
+  end
+
+  # Server Callbacks
+  def init(_) do
+    :ets.new(@pair_table_name, [:named_table, :set, :private])
+    :ets.new(@vocabulary_table_name, [:named_table, :set, :private])
+    :ets.new(@ortho_table_name, [:named_table, :set, :private])
+    :ets.new(@remediation_table_name, [:named_table, :set, :private])
+    {:ok, %{}}
+  end
+
+  def handle_call(:stop, _from, state) do
     :ets.delete(@pair_table_name)
     :ets.delete(@vocabulary_table_name)
     :ets.delete(@ortho_table_name)
     :ets.delete(@remediation_table_name)
-    :ok
+    {:stop, :normal, :ok, state}
   end
 
-  def add_pairs(pairs) when is_list(pairs) do
-    Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
+  def handle_call({:add_pairs, pairs}, _from, state) do
+    new_pairs = Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
       case :ets.insert_new(@pair_table_name, {{f, s}, pair}) do
         true -> [pair | acc]
         false -> acc
       end
     end)
+    {:reply, new_pairs, state}
   end
 
-  def add_vocabulary(words) when is_list(words) do
-    Enum.reduce(words, [], fn word, acc ->
+  def handle_call({:add_vocabulary, words}, _from, state) do
+    new_words = Enum.reduce(words, [], fn word, acc ->
       case :ets.insert_new(@vocabulary_table_name, {word}) do
         true -> [word | acc]
         false -> acc
       end
     end)
+    {:reply, new_words, state}
   end
 
-  def add_orthos(orthos) when is_list(orthos) do
-    Enum.reduce(orthos, [], fn %Ortho{id: id} = ortho, acc ->
+  def handle_call({:add_orthos, orthos}, _from, state) do
+    new_orthos = Enum.reduce(orthos, [], fn %Ortho{id: id} = ortho, acc ->
       case :ets.insert_new(@ortho_table_name, {id, ortho}) do
         true -> [ortho | acc]
         false -> acc
       end
     end)
+    {:reply, new_orthos, state}
   end
 
-  def add_remediations(remediations) when is_list(remediations) do
-    Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
+  def handle_call({:add_remediations, remediations}, _from, state) do
+    new_remediations = Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
       case :ets.insert_new(@remediation_table_name, {{f, s}, ortho}) do
         true -> [{ortho, remediation} | acc]
         false -> acc
       end
     end)
+    {:reply, new_remediations, state}
   end
 
-  def get_remediations() do
-    :ets.tab2list(@remediation_table_name)
+  def handle_call(:get_remediations, _from, state) do
+    remediations = :ets.tab2list(@remediation_table_name)
     |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
+    {:reply, remediations, state}
   end
 
-  def get_vocabulary() do
-    :ets.tab2list(@vocabulary_table_name) |> Enum.map(fn {w} -> w end)
+  def handle_call(:get_vocabulary, _from, state) do
+    vocabulary = :ets.tab2list(@vocabulary_table_name) |> Enum.map(fn {w} -> w end)
+    {:reply, vocabulary, state}
   end
 
-  def get_pairs() do
-    :ets.tab2list(@pair_table_name) |> Enum.map(fn {_key, val} -> val end)
+  def handle_call(:get_pairs, _from, state) do
+    pairs = :ets.tab2list(@pair_table_name) |> Enum.map(fn {_key, val} -> val end)
+    {:reply, pairs, state}
   end
 
-  def get_orthos() do
-    :ets.tab2list(@ortho_table_name) |> Enum.map(fn {_key, val} -> val end)
+  def handle_call(:get_orthos, _from, state) do
+    orthos = :ets.tab2list(@ortho_table_name) |> Enum.map(fn {_key, val} -> val end)
+    {:reply, orthos, state}
   end
 
-  def get_relevant_context_for_remediations(remediations) do
-    remediations
+  def handle_call({:get_relevant_context_for_remediations, remediations}, _from, state) do
+    relevant_context = remediations
     |> Enum.filter(fn %Pair{first: f, second: s} ->
       :ets.member(@pair_table_name, {f, s})
     end)
+    {:reply, relevant_context, state}
   end
 
-  def remove_remediations(remediations) do
+  def handle_call({:remove_remediations, remediations}, _from, state) do
     Enum.each(remediations, fn %Pair{first: f, second: s} ->
       :ets.delete(@remediation_table_name, {f, s})
     end)
+    {:reply, :ok, state}
   end
 end

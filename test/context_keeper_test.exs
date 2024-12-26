@@ -3,7 +3,8 @@ defmodule ContextKeeperTest do
   alias ContextKeeper
 
   setup do
-    ContextKeeper.start()
+    {:ok, _pid} = ContextKeeper.start_link(nil)
+    :ok
   end
 
   test "it can take multiple values at once" do
