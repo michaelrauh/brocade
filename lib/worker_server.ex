@@ -11,6 +11,10 @@ defmodule WorkerServer do
     GenServer.call(__MODULE__, :get_context_version)
   end
 
+  def process do
+    GenServer.call(__MODULE__, :process)
+  end
+
   # Server (callbacks)
 
   def init(_init_arg) do
@@ -21,4 +25,8 @@ defmodule WorkerServer do
     {:reply, {:ok, version}, version}
   end
 
+  def handle_call(:process, _from, _version) do
+    {_status, _top, version} = WorkServer.pop()
+    {:reply, :ok, version}
+  end
 end
