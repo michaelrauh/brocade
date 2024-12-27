@@ -15,7 +15,11 @@ defmodule Ingestor do
     all_remediations = ContextKeeper.get_remediations()
 
     # todo push this filter down into the context keeper
-    remediations = Enum.filter(all_remediations, fn {_, pair} -> Enum.member?(relevant_remediation_pairs, pair) end)
+    remediations =
+      Enum.filter(all_remediations, fn {_, pair} ->
+        Enum.member?(relevant_remediation_pairs, pair)
+      end)
+
     WorkServer.push(remediations)
     WorkServer.push(Ortho.new())
     ContextKeeper.remove_remediations(relevant_remediation_pairs)
