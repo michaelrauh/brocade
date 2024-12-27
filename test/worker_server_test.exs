@@ -59,10 +59,3 @@ defmodule WorkerServerTest do
     assert Enum.any?(remediations, fn {_ortho, pair} -> pair == Pair.new("a", "b") end)
   end
 end
-
-# context = MapSet.new()
-#     ortho = Ortho.new()
-#     {:ok, ortho} = Ortho.add(ortho, "a", context)
-#     {status, remediation} = Ortho.add(ortho, "b", context)
-#     assert status == :error
-#     assert remediation == Pair.new("a", "b")
