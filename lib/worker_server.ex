@@ -63,6 +63,11 @@ defmodule WorkerServer do
     {:reply, :ok, %{state | subscribers: [pid | state.subscribers]}}
   end
 
+  def handle_info(:retry_process, state) do
+    process()
+    {:noreply, state}
+  end
+
   defp update_state_from_version({_code, _top, version}, state) do
     if version != state.version do
       %{
@@ -91,6 +96,7 @@ defmodule WorkerServer do
         process_work(state)
 
       {:error, _top, _version} ->
+        Process.send_after(self(), :retry_process, 5_000)
         state
     end
   end
