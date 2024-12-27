@@ -19,6 +19,7 @@ defmodule WorkerServer do
     GenServer.call(__MODULE__, :get_vocabulary)
   end
 
+  # todo address issue that this will not be called if the server dies
   def process do
     GenServer.cast(__MODULE__, :process)
   end
