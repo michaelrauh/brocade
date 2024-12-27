@@ -37,6 +37,7 @@ defmodule WorkServer do
     {:reply, {:ok, top, version}, {rest, version}}
   end
 
+  # todo change error to empty
   def handle_call(:pop, _from, {[], version}) do
     {:reply, {:error, nil, version}, {[], version}}
   end

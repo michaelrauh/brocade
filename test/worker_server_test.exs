@@ -47,7 +47,7 @@ defmodule WorkerServerTest do
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
-    assert Enum.member?(ContextKeeper.get_orthos(), ortho)
+    assert ortho in ContextKeeper.get_orthos()
   end
 
   # handles remediations

@@ -33,21 +33,22 @@ defmodule WorkerServer do
     {:ok, %{version: -1, pairs: [], vocabulary: [], subscribers: []}}
   end
 
-  def handle_call(:get_context_version, _from, state) do
-    {:reply, {:ok, state.version}, state}
-  end
-
   def handle_cast(:process, state) do
     Task.start(fn ->
       new_state = process_work(state)
       GenServer.cast(__MODULE__, {:done_process, new_state})
     end)
+
     {:noreply, state}
   end
 
   def handle_cast({:done_process, new_state}, _old_state) do
-    Enum.each(new_state.subscribers, fn sub -> send(sub, :worker_server_done) end)
+    for sub <- new_state.subscribers, do: send(sub, :worker_server_done)
     {:noreply, new_state}
+  end
+
+  def handle_call(:get_context_version, _from, state) do
+    {:reply, {:ok, state.version}, state}
   end
 
   def handle_call(:get_pairs, _from, state) do
@@ -81,25 +82,27 @@ defmodule WorkerServer do
 
     case status_top_and_version do
       {:ok, top, _version} ->
-        found_items = Enum.map(state.vocabulary, fn word ->
-          case Ortho.add(top, word, state.pairs) do
-            {:ok, new_item} ->
-              new_item
+        found_items =
+          Enum.map(state.vocabulary, fn word ->
+            case Ortho.add(top, word, state.pairs) do
+              {:ok, new_item} ->
+                new_item
 
-            {:error, _missing_pair} ->
-              nil
+              {:error, _missing_pair} ->
+                nil
 
-            {:diag, _extra_word_in_shell} ->
-              nil
-          end
-        end)
-        |> Enum.reject(fn x -> x == nil end)
+              {:diag, _extra_word_in_shell} ->
+                nil
+            end
+          end)
+          |> Enum.reject(&is_nil/1)
+
         new_orthos = ContextKeeper.add_orthos(found_items)
         WorkServer.push(new_orthos)
         process_work(state)
 
-        {:error, _top, _version} ->
-          state
-      end
+      {:error, _top, _version} ->
+        state
+    end
   end
 end
