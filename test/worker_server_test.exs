@@ -50,5 +50,19 @@ defmodule WorkerServerTest do
     assert ortho in ContextKeeper.get_orthos()
   end
 
-  # handles remediations
+  test "writes remediations to the context keeper" do
+    WorkServer.push(Ortho.new())
+    ContextKeeper.add_vocabulary(["a", "b"])
+    :ok = WorkerServer.process()
+    assert_receive :worker_server_done
+    remediations = ContextKeeper.get_remediations()
+    assert Enum.any?(remediations, fn {_ortho, pair} -> pair == Pair.new("a", "b") end)
+  end
 end
+
+# context = MapSet.new()
+#     ortho = Ortho.new()
+#     {:ok, ortho} = Ortho.add(ortho, "a", context)
+#     {status, remediation} = Ortho.add(ortho, "b", context)
+#     assert status == :error
+#     assert remediation == Pair.new("a", "b")

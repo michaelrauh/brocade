@@ -82,22 +82,33 @@ defmodule WorkerServer do
 
     case status_top_and_version do
       {:ok, top, _version} ->
-        found_items =
+        {new_orthos, remediations} =
           Enum.map(state.vocabulary, fn word ->
             case Ortho.add(top, word, state.pairs) do
               {:ok, new_item} ->
-                new_item
+                {:ortho, new_item}
 
-              {:error, _missing_pair} ->
-                nil
+              {:error, missing_pair} ->
+                {:remediation, top, missing_pair}
 
               {:diag, _extra_word_in_shell} ->
                 nil
             end
           end)
           |> Enum.reject(&is_nil/1)
+          |> Enum.split_with(fn
+            {:ortho, _item} -> true
+            {:remediation, _ortho, _missing_pair} -> false
+          end)
+          |> (fn {orthos, remediations} ->
+                {Enum.map(orthos, fn {:ortho, item} -> item end),
+                 Enum.map(remediations, fn {:remediation, ortho, missing_pair} ->
+                   {ortho, missing_pair}
+                 end)}
+              end).()
 
-        new_orthos = ContextKeeper.add_orthos(found_items)
+        new_orthos = ContextKeeper.add_orthos(new_orthos)
+        ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
         process_work(state)
 
