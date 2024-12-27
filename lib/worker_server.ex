@@ -97,7 +97,8 @@ defmodule WorkerServer do
         process_work(state)
 
       {:error, _top, _version} ->
-        Process.send_after(self(), :retry_process, 5_000)
+        IO.inspect("queue is empty...")
+        Process.send_after(WorkerServer, :retry_process, 5_000)
         state
     end
   end

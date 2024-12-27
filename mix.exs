@@ -12,12 +12,19 @@ defmodule Brocade.MixProject do
   end
 
   # Run "mix help compile.app" to learn about applications.
-  # def application do
-  #   [
-  #     extra_applications: [:logger],
-  #     mod: {Brocade.Application, []}
-  #   ]
-  # end
+  def application do
+    [
+      extra_applications: [:logger]
+    ] ++ mod_option()
+  end
+
+  defp mod_option do
+    if Mix.env() != :test do
+      [mod: {Brocade.Application, []}]
+    else
+      []
+    end
+  end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
