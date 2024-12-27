@@ -7,6 +7,7 @@ defmodule WorkerServerTest do
     {:ok, _pid} = start_supervised(WorkerServer)
     {:ok, _pid} = start_supervised(WorkServer)
     {:ok, _pid} = start_supervised(ContextKeeper)
+    WorkerServer.subscribe()
     :ok
   end
 
@@ -19,6 +20,7 @@ defmodule WorkerServerTest do
     {:ok, version} = WorkerServer.get_context_version()
     assert version == -1
     :ok = WorkerServer.process()
+    assert_receive :worker_server_done
     {:ok, version} = WorkerServer.get_context_version()
     assert version == 0
   end
@@ -27,6 +29,7 @@ defmodule WorkerServerTest do
     ContextKeeper.add_pairs([Pair.new("a", "b")])
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
+    assert_receive :worker_server_done
     {:ok, pairs} = WorkerServer.get_pairs()
     {:ok, vocabulary} = WorkerServer.get_vocabulary()
     assert pairs == MapSet.new([Pair.new("a", "b")])
@@ -43,6 +46,7 @@ defmodule WorkerServerTest do
     ContextKeeper.add_pairs([Pair.new("a", "b")])
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
+    assert_receive :worker_server_done
     assert Enum.member?(ContextKeeper.get_orthos(), ortho)
   end
 

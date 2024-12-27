@@ -20,22 +20,34 @@ defmodule WorkerServer do
   end
 
   def process do
-    GenServer.call(__MODULE__, :process)
+    GenServer.cast(__MODULE__, :process)
+  end
+
+  def subscribe(pid \\ self()) do
+    GenServer.call(__MODULE__, {:subscribe, pid})
   end
 
   # Server (callbacks)
 
   def init(_init_arg) do
-    {:ok, %{version: -1, pairs: [], vocabulary: []}}
+    {:ok, %{version: -1, pairs: [], vocabulary: [], subscribers: []}}
   end
 
   def handle_call(:get_context_version, _from, state) do
     {:reply, {:ok, state.version}, state}
   end
 
-  def handle_call(:process, _from, state) do
-    new_state = process_work(state)
-    {:reply, :ok, new_state}
+  def handle_cast(:process, state) do
+    Task.start(fn ->
+      new_state = process_work(state)
+      GenServer.cast(__MODULE__, {:done_process, new_state})
+    end)
+    {:noreply, state}
+  end
+
+  def handle_cast({:done_process, new_state}, _old_state) do
+    Enum.each(new_state.subscribers, fn sub -> send(sub, :worker_server_done) end)
+    {:noreply, new_state}
   end
 
   def handle_call(:get_pairs, _from, state) do
@@ -44,6 +56,10 @@ defmodule WorkerServer do
 
   def handle_call(:get_vocabulary, _from, state) do
     {:reply, {:ok, state.vocabulary}, state}
+  end
+
+  def handle_call({:subscribe, pid}, _from, state) do
+    {:reply, :ok, %{state | subscribers: [pid | state.subscribers]}}
   end
 
   defp update_state_from_version({_code, _top, version}, state) do
