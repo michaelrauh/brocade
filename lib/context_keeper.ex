@@ -73,48 +73,58 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:add_pairs, pairs}, _from, state) do
-    new_pairs = Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
-      case :ets.insert_new(@pair_table_name, {{f, s}, pair}) do
-        true -> [pair | acc]
-        false -> acc
-      end
-    end)
+    new_pairs =
+      Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
+        case :ets.insert_new(@pair_table_name, {{f, s}, pair}) do
+          true -> [pair | acc]
+          false -> acc
+        end
+      end)
+
     {:reply, new_pairs, state}
   end
 
   def handle_call({:add_vocabulary, words}, _from, state) do
-    new_words = Enum.reduce(words, [], fn word, acc ->
-      case :ets.insert_new(@vocabulary_table_name, {word}) do
-        true -> [word | acc]
-        false -> acc
-      end
-    end)
+    new_words =
+      Enum.reduce(words, [], fn word, acc ->
+        case :ets.insert_new(@vocabulary_table_name, {word}) do
+          true -> [word | acc]
+          false -> acc
+        end
+      end)
+
     {:reply, new_words, state}
   end
 
   def handle_call({:add_orthos, orthos}, _from, state) do
-    new_orthos = Enum.reduce(orthos, [], fn %Ortho{id: id} = ortho, acc ->
-      case :ets.insert_new(@ortho_table_name, {id, ortho}) do
-        true -> [ortho | acc]
-        false -> acc
-      end
-    end)
+    new_orthos =
+      Enum.reduce(orthos, [], fn %Ortho{id: id} = ortho, acc ->
+        case :ets.insert_new(@ortho_table_name, {id, ortho}) do
+          true -> [ortho | acc]
+          false -> acc
+        end
+      end)
+
     {:reply, new_orthos, state}
   end
 
   def handle_call({:add_remediations, remediations}, _from, state) do
-    new_remediations = Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
-      case :ets.insert_new(@remediation_table_name, {{f, s}, ortho}) do
-        true -> [{ortho, remediation} | acc]
-        false -> acc
-      end
-    end)
+    new_remediations =
+      Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
+        case :ets.insert_new(@remediation_table_name, {{f, s}, ortho}) do
+          true -> [{ortho, remediation} | acc]
+          false -> acc
+        end
+      end)
+
     {:reply, new_remediations, state}
   end
 
   def handle_call(:get_remediations, _from, state) do
-    remediations = :ets.tab2list(@remediation_table_name)
-    |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
+    remediations =
+      :ets.tab2list(@remediation_table_name)
+      |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
+
     {:reply, remediations, state}
   end
 
@@ -134,10 +144,12 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:get_relevant_context_for_remediations, remediations}, _from, state) do
-    relevant_context = remediations
-    |> Enum.filter(fn %Pair{first: f, second: s} ->
-      :ets.member(@pair_table_name, {f, s})
-    end)
+    relevant_context =
+      remediations
+      |> Enum.filter(fn %Pair{first: f, second: s} ->
+        :ets.member(@pair_table_name, {f, s})
+      end)
+
     {:reply, relevant_context, state}
   end
 
@@ -145,6 +157,7 @@ defmodule ContextKeeper do
     Enum.each(remediations, fn %Pair{first: f, second: s} ->
       :ets.delete(@remediation_table_name, {f, s})
     end)
+
     {:reply, :ok, state}
   end
 end

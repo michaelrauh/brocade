@@ -4,11 +4,19 @@ defmodule WorkerServer do
   # Client API
 
   def start_link(_args) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   def get_context_version do
     GenServer.call(__MODULE__, :get_context_version)
+  end
+
+  def get_pairs do
+    GenServer.call(__MODULE__, :get_pairs)
+  end
+
+  def get_vocabulary do
+    GenServer.call(__MODULE__, :get_vocabulary)
   end
 
   def process do
@@ -18,15 +26,64 @@ defmodule WorkerServer do
   # Server (callbacks)
 
   def init(_init_arg) do
-    {:ok, -1}
+    {:ok, %{version: -1, pairs: [], vocabulary: []}}
   end
 
-  def handle_call(:get_context_version, _from, version) do
-    {:reply, {:ok, version}, version}
+  def handle_call(:get_context_version, _from, state) do
+    {:reply, {:ok, state.version}, state}
   end
 
-  def handle_call(:process, _from, _version) do
-    {_status, _top, version} = WorkServer.pop()
-    {:reply, :ok, version}
+  def handle_call(:process, _from, state) do
+    new_state = process_work(state)
+    {:reply, :ok, new_state}
+  end
+
+  def handle_call(:get_pairs, _from, state) do
+    {:reply, {:ok, state.pairs}, state}
+  end
+
+  def handle_call(:get_vocabulary, _from, state) do
+    {:reply, {:ok, state.vocabulary}, state}
+  end
+
+  defp update_state_from_version({_code, _top, version}, state) do
+    if version != state.version do
+      %{
+        state
+        | version: version,
+          pairs: MapSet.new(ContextKeeper.get_pairs()),
+          vocabulary: ContextKeeper.get_vocabulary()
+      }
+    else
+      state
+    end
+  end
+
+  defp process_work(state) do
+    status_top_and_version = WorkServer.pop()
+    state = update_state_from_version(status_top_and_version, state)
+
+    case status_top_and_version do
+      {:ok, top, _version} ->
+        found_items = Enum.map(state.vocabulary, fn word ->
+          case Ortho.add(top, word, state.pairs) do
+            {:ok, new_item} ->
+              new_item
+
+            {:error, _missing_pair} ->
+              nil
+
+            {:diag, _extra_word_in_shell} ->
+              nil
+          end
+        end)
+        |> Enum.reject(fn x -> x == nil end)
+        new_orthos = ContextKeeper.add_orthos(found_items)
+        WorkServer.push(new_orthos)
+        process_work(state)
+
+        {:error, _top, _version} ->
+          state
+      end
   end
 end
