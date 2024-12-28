@@ -20,6 +20,7 @@ defmodule Ortho do
     end)
   end
 
+  #Todo make this queryable for what will satisfy rather than guess and check
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
     {next_position, new_counter} = Counter.increment(counter)
     shell = Enum.sum(next_position)

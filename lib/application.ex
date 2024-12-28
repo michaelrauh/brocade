@@ -13,7 +13,9 @@ defmodule Brocade.Application do
     {:ok, pid} = Supervisor.start_link(children, opts)
 
     WorkerServer.process()
+    # :observer.start()
 
+    Profiler.profile_app()
     {:ok, pid}
   end
 end
