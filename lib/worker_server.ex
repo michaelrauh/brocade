@@ -83,6 +83,7 @@ defmodule WorkerServer do
   end
 
   defp process_work(state) do
+    # todo add message acknowledgement. If the worker dies during processing, the message will be lost
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
 

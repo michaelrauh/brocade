@@ -7,6 +7,40 @@ defmodule Ortho do
     %Ortho{counter: Counter.new()}
   end
 
+  def example do
+    :eflame.apply(fn() ->
+      # Generate a flame graph of a single function call
+
+    context = MapSet.new()
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {status, remediation} = Ortho.add(ortho, "b", context)
+
+    context = MapSet.new([Pair.new("a", "b")])
+
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {:ok, ortho} = Ortho.add(ortho, "b", context)
+    {:diag, reason} = Ortho.add(ortho, "b", context)
+
+    context =
+      MapSet.new([
+        Pair.new("a", "b"),
+        Pair.new("c", "d"),
+        Pair.new("a", "c"),
+        Pair.new("b", "d"),
+        Pair.new("a", "e")
+      ])
+
+    ortho = Ortho.new()
+    {:ok, ortho} = Ortho.add(ortho, "a", context)
+    {:ok, ortho} = Ortho.add(ortho, "b", context)
+    {:ok, ortho} = Ortho.add(ortho, "c", context)
+    {:ok, ortho} = Ortho.add(ortho, "d", context)
+    {:ok, _ortho} = Ortho.add(ortho, "e", context)
+  end, [])
+  end
+
   def previous_positions(position) do
     position
     |> Enum.with_index()
