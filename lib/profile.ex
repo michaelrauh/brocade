@@ -18,7 +18,7 @@ defmodule Profiler do
       # Generate a profile and analyze it
       IO.puts("Stopping :fprof and analyzing results...")
       :fprof.profile()
-      :fprof.analyse()
+      :fprof.analyse(dest: 'fprof_results.txt')
 
       IO.puts("Profiling completed")
     end)
