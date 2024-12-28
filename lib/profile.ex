@@ -10,7 +10,7 @@ defmodule Profiler do
       :fprof.trace([:start, procs: :all])
 
       # Allow profiling to run for a while (e.g., 15 seconds)
-      :timer.sleep(3_000)
+      :timer.sleep(1_000)
 
       # Stop tracing
       :fprof.trace(:stop)
@@ -18,7 +18,7 @@ defmodule Profiler do
       # Generate a profile and analyze it
       IO.puts("Stopping :fprof and analyzing results...")
       :fprof.profile()
-      :fprof.analyse([:file, "fprof_results.txt"])
+      :fprof.analyse()
 
       IO.puts("Profiling completed")
     end)
