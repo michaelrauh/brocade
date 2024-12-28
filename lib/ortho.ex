@@ -20,6 +20,7 @@ defmodule Ortho do
     end)
   end
 
+  # todo make ortho report on what is needed rather than reporting results on attempted adds
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
     {next_position, new_counter} = Counter.increment(counter)
     shell = Enum.sum(next_position)
@@ -56,6 +57,7 @@ defmodule Ortho do
     end
   end
 
+  # todo memoize the parts of this that are common to all orthos
   defp calculate_diagonals(grid) do
     Enum.reduce(Map.keys(grid), %{}, fn key, acc ->
       distance = Enum.sum(key)
@@ -69,6 +71,7 @@ defmodule Ortho do
     end)
   end
 
+  # todo speed this up
   defp calculate_id(grid) do
     dimension = Enum.count(List.first(Map.keys(grid)))
     permutations = permutations(Enum.to_list(0..(dimension - 1)))
