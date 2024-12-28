@@ -84,6 +84,7 @@ defmodule WorkerServer do
 
   defp process_work(state) do
     # todo add message acknowledgement. If the worker dies during processing, the message will be lost
+    # if switching to rabbit, heartbeats will be necessary
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
 
@@ -98,7 +99,7 @@ defmodule WorkerServer do
         process_work(state)
 
       {:error, _top, _version} ->
-        IO.inspect("queue is empty...")
+        # IO.inspect("queue is empty...")
         Process.send_after(WorkerServer, :retry_process, 5_000)
         state
     end

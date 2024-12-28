@@ -14,14 +14,14 @@ defmodule Ortho do
     context = MapSet.new()
     ortho = Ortho.new()
     {:ok, ortho} = Ortho.add(ortho, "a", context)
-    {status, remediation} = Ortho.add(ortho, "b", context)
+    {_status, _remediation} = Ortho.add(ortho, "b", context)
 
     context = MapSet.new([Pair.new("a", "b")])
 
     ortho = Ortho.new()
     {:ok, ortho} = Ortho.add(ortho, "a", context)
     {:ok, ortho} = Ortho.add(ortho, "b", context)
-    {:diag, reason} = Ortho.add(ortho, "b", context)
+    {:diag, _reason} = Ortho.add(ortho, "b", context)
 
     context =
       MapSet.new([
@@ -54,7 +54,20 @@ defmodule Ortho do
     end)
   end
 
-  # todo make ortho report on what is needed rather than reporting results on attempted adds
+  def get_requirements(%Ortho{grid: grid, counter: counter}) do
+    # todo pass useful state back out to prevent recalculating
+    {next_position, _} = Counter.increment(counter)
+    shell = Enum.sum(next_position)
+    forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
+
+    grid = optionally_pad_grid(grid, next_position)
+
+    required = find_all_pair_prefixes(grid, next_position)
+
+    {forbidden, required}
+  end
+
+  # Todo remove checks
   def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
     {next_position, new_counter} = Counter.increment(counter)
     shell = Enum.sum(next_position)
@@ -81,6 +94,11 @@ defmodule Ortho do
     |> Enum.map(&Map.get(grid, &1))
     |> Enum.map(&Pair.new(&1, item))
     |> Enum.find(&(not MapSet.member?(context, &1)))
+  end
+
+  defp find_all_pair_prefixes(grid, next_position) do
+    previous_positions(next_position)
+    |> Enum.map(&Map.get(grid, &1))
   end
 
   defp optionally_pad_grid(grid, next_position) do
