@@ -14,6 +14,7 @@ defmodule IngestorTest do
   end
 
   test "it can find results" do
+    Counter.start()
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
     ortho = Ortho.add(ortho, "b")
@@ -23,5 +24,6 @@ defmodule IngestorTest do
     WorkerServer.process()
     assert_receive :worker_server_done
     assert ortho in ContextKeeper.get_orthos()
+    Counter.stop()
   end
 end

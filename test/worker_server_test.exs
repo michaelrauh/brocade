@@ -37,6 +37,7 @@ defmodule WorkerServerTest do
   end
 
   test "searches for results and writes new ones back to context and the workserver" do
+    Counter.start()
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
     ortho = Ortho.add(ortho, "b")
@@ -47,14 +48,17 @@ defmodule WorkerServerTest do
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
     assert ortho in ContextKeeper.get_orthos()
+    Counter.stop()
   end
 
   test "writes remediations to the context keeper" do
+    Counter.start()
     WorkServer.push(Ortho.new())
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
     remediations = ContextKeeper.get_remediations()
     assert Enum.any?(remediations, fn {_ortho, pair} -> pair == Pair.new("a", "b") end)
+    Counter.stop()
   end
 end

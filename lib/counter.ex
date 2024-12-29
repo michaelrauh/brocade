@@ -2,7 +2,7 @@ defmodule Counter do
   @table_name :counter
 
   def start() do
-    :ets.new(@table_name, [:named_table, :set, :private])
+    :ets.new(@table_name, [:named_table, :set, :public])
   end
 
   def stop() do

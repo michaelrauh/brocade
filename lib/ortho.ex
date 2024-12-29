@@ -1,10 +1,10 @@
 defmodule Ortho do
-  defstruct grid: %{}, counter: nil, id: nil
+  defstruct grid: %{}, shape: [2,2], position: [0,0], id: nil
 
   alias Counter
 
-  def new do
-    %Ortho{counter: Counter.new()}
+  def new() do
+    %Ortho{grid: %{}, shape: [2, 2], position: [0, 0], id: nil}
   end
 
   def previous_positions(position) do
@@ -20,24 +20,23 @@ defmodule Ortho do
     end)
   end
 
-  def get_requirements(%Ortho{grid: grid, counter: counter}) do
-    # todo pass useful state back out to prevent recalculating
-    {next_position, _} = Counter.increment(counter)
-    shell = Enum.sum(next_position)
+  def get_requirements(%Ortho{grid: grid, position: position}) do
+
+    # todo cache sum next position
+    shell = Enum.sum(position)
     forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
 
-    grid = optionally_pad_grid(grid, next_position)
-
-    required = find_all_pair_prefixes(grid, next_position)
+    grid = optionally_pad_grid(grid, position)
+    required = find_all_pair_prefixes(grid, position)
 
     {forbidden, required}
   end
 
-  def add(%Ortho{grid: grid, counter: counter} = ortho, item) do
-    {next_position, new_counter} = Counter.increment(counter)
-    grid = optionally_pad_grid(grid, next_position)
-    new_grid = Map.put(grid, next_position, item)
-    %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}
+  def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
+    {new_shape, next_position} = Counter.increment(shape, position)
+    grid = optionally_pad_grid(grid, position)
+    new_grid = Map.put(grid, position, item)
+    %Ortho{ortho | grid: new_grid, position: next_position, shape: new_shape, id: calculate_id(new_grid)}
   end
 
   defp find_all_pair_prefixes(grid, next_position) do
@@ -46,6 +45,7 @@ defmodule Ortho do
   end
 
   defp optionally_pad_grid(grid, next_position) do
+    # todo check the new shape to see if the grid should be padded
     if Enum.count(List.first(Map.keys(grid), [0, 0])) != Enum.count(next_position) do
       pad_grid(grid)
     else

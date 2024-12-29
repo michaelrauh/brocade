@@ -81,6 +81,7 @@ defmodule ContextKeeperTest do
   end
 
   test "it can take in orthos and not duplicate them by hash" do
+    Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
     ortho1 = Ortho.add(ortho1, "a")
@@ -100,9 +101,11 @@ defmodule ContextKeeperTest do
     assert ContextKeeper.get_orthos() == [ortho1]
 
     ContextKeeper.stop()
+    Counter.stop()
   end
 
   test "it gives back new orthos that are not duplicate by hash on add" do
+    Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
     ortho1 = Ortho.add(ortho1, "a")
@@ -118,9 +121,11 @@ defmodule ContextKeeperTest do
     assert ContextKeeper.add_orthos([ortho1, ortho2]) == [ortho2]
 
     ContextKeeper.stop()
+    Counter.stop()
   end
 
   test "it accepts near misses mapped to the effected orthos" do
+    Counter.start()
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
@@ -129,9 +134,11 @@ defmodule ContextKeeperTest do
     assert ContextKeeper.get_remediations() == [{ortho, Pair.new("a", "b")}]
 
     ContextKeeper.stop()
+    Counter.stop()
   end
 
   test "it can remove remediations" do
+    Counter.start()
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
@@ -144,5 +151,6 @@ defmodule ContextKeeperTest do
     assert ContextKeeper.get_remediations() == []
 
     ContextKeeper.stop()
+    Counter.stop()
   end
 end
