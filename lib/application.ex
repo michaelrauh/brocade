@@ -8,6 +8,7 @@ defmodule Brocade.Application do
       {Ingestor, []},
       {ContextKeeper, []}
     ]
+
     # todo scale workers
 
     opts = [strategy: :one_for_one, name: Brocade.Supervisor]

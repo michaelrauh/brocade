@@ -90,8 +90,34 @@ defmodule WorkerServer do
 
     case status_top_and_version do
       {:ok, top, _version} ->
-        {new_orthos, remediations} =
-          get_orthos_and_remediations(top, state.pairs, state.vocabulary)
+        {forbidden, required} = Ortho.get_requirements(top)
+        working_vocabulary = Enum.reject(state.vocabulary, &MapSet.member?(forbidden, &1))
+
+        {candidates, remediations} =
+          Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
+            case Enum.all?(required, fn req ->
+                   MapSet.member?(state.pairs, Pair.new(req, word))
+                 end) do
+              true ->
+                {[word | cands], rems}
+
+              false ->
+                failed_req =
+                  Enum.find(required, fn req ->
+                    not MapSet.member?(state.pairs, Pair.new(req, word))
+                  end)
+
+                {cands, [{top, Pair.new(failed_req, word)} | rems]}
+            end
+          end)
+
+        new_orthos =
+          Enum.map(candidates, fn word ->
+            case Ortho.add(top, word, state.pairs) do
+              {:ok, ortho} -> ortho
+              _ -> nil
+            end
+          end)
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
         ContextKeeper.add_remediations(remediations)

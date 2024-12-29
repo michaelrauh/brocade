@@ -37,9 +37,10 @@ defmodule OrthoTest do
 
     # tracking remediations:
     # run the filters in series and if any filter fails, that becomes the remediation.
-    # this will be a big change to remediations, as it is only a single prefix rather than the whole pair.
-    # that will mean that when seeing if a remediation is invalidated it will be necessary to pull by prefix and
-    # invalidate by prefix. It will also cut down on storage.
+    # remediation example:
+    # required = ["a", "b"]
+    # pairs = [{"a", "c"}, {"b", "c"}, {"a", "d"}, {"b", "d"}, {"a", "e"}]
+    # this will return a remediation for "e". The remediation will be of the form {ortho, Pair.new("a", "e")}
   end
 
   test "an ortho may add again" do
