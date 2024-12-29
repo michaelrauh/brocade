@@ -95,19 +95,11 @@ defmodule WorkerServer do
 
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
-            case Enum.all?(required, fn req ->
-                   MapSet.member?(state.pairs, Pair.new(req, word))
-                 end) do
-              true ->
-                {[word | cands], rems}
-
-              false ->
-                failed_req =
-                  Enum.find(required, fn req ->
-                    not MapSet.member?(state.pairs, Pair.new(req, word))
-                  end)
-
-                {cands, [{top, Pair.new(failed_req, word)} | rems]}
+            missing_required = Enum.find(required, &(!MapSet.member?(state.pairs, Pair.new(&1, word))))
+            if missing_required do
+              {cands, [{top, Pair.new(missing_required, word)} | rems]}
+            else
+              {[word | cands], rems}
             end
           end)
 
