@@ -57,10 +57,10 @@ defmodule ContextKeeper do
 
   # Server Callbacks
   def init(_) do
-    :ets.new(@pair_table_name, [:named_table, :set, :private])
-    :ets.new(@vocabulary_table_name, [:named_table, :set, :private])
-    :ets.new(@ortho_table_name, [:named_table, :set, :private])
-    :ets.new(@remediation_table_name, [:named_table, :set, :private])
+    :ets.new(@pair_table_name, [:named_table, :set, :public])
+    :ets.new(@vocabulary_table_name, [:named_table, :set, :public])
+    :ets.new(@ortho_table_name, [:named_table, :set, :public])
+    :ets.new(@remediation_table_name, [:named_table, :set, :public])
     {:ok, %{}}
   end
 

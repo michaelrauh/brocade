@@ -13,7 +13,7 @@ defmodule Brocade.Application do
     Counter.start()
     opts = [strategy: :one_for_one, name: Brocade.Supervisor]
     {:ok, pid} = Supervisor.start_link(children, opts)
-    # Ingestor.ingest(File.read!("example.txt"))
+    Ingestor.ingest(File.read!("example.txt"))
     WorkerServer.process()
 
     {:ok, pid}

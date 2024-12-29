@@ -31,9 +31,9 @@ defmodule Ingestor do
     ContextKeeper.add_pairs(pairs)
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
-    all_remediations = ContextKeeper.get_remediations()
 
-    # todo push this filter down into the context keeper
+    # todo push this filter down into the context keeper - get_remediations is causing a crash as it is too big to transfer in five seconds
+    all_remediations = ContextKeeper.get_remediations()
     remediations =
       Enum.filter(all_remediations, fn {_, pair} ->
         Enum.member?(relevant_remediation_pairs, pair)
