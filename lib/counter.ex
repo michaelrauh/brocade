@@ -1,24 +1,33 @@
 defmodule Counter do
-  defstruct shape: [2, 2], options: Enum.sort(Utils.cartesian_product([2, 2]))
+  def get_next(shape, current_position) do
+    options =
+      if shape == [2, 2] do
+        shape
+        |> sorted_cartesian()
+      else
+        shape
+        |> sorted_cartesian()
+        |> Enum.reject(&(hd(&1) == 0))
+      end
 
-  def new(), do: %Counter{}
+    index = Enum.find_index(options, &(&1 == current_position))
 
-  def increment(%Counter{shape: shape, options: []}) do
-    # todo consider sending a signal to the caller if the new value will be more dimensions
-    new_shape = [2 | shape]
+    if index == length(options) - 1 do
+      new_shape = [2 | shape]
 
-    all_new_options =
-      Utils.cartesian_product(new_shape)
-      |> Enum.sort_by(&{Enum.sum(&1), &1})
-      |> Enum.reject(&(hd(&1) == 0))
+      new_options =
+        new_shape
+        |> sorted_cartesian()
+        |> Enum.reject(&(hd(&1) == 0))
 
-    {current, remaining} = List.pop_at(all_new_options, 0)
-
-    {current, %Counter{shape: new_shape, options: remaining}}
+      {new_shape, hd(new_options)}
+    else
+      {shape, Enum.at(options, index + 1)}
+    end
   end
 
-  def increment(%Counter{shape: shape, options: options}) do
-    {current, remaining} = List.pop_at(options, 0)
-    {current, %Counter{shape: shape, options: remaining}}
+  defp sorted_cartesian(shape) do
+    Utils.cartesian_product(shape)
+    |> Enum.sort_by(&{Enum.sum(&1), &1})
   end
 end
