@@ -1,4 +1,26 @@
 defmodule Counter do
+  @table_name :counter
+
+  def start() do
+    :ets.new(@table_name, [:named_table, :set, :private])
+  end
+
+  def stop() do
+    :ets.delete(@table_name)
+  end
+
+  def increment(shape, current_position) do
+    case :ets.lookup(@table_name, {shape, current_position}) do
+      [] ->
+        {new_shape, new_position} = get_next(shape, current_position)
+        :ets.insert(@table_name, {{shape, current_position}, {new_shape, new_position}})
+        {new_shape, new_position}
+
+      [{{_shape, _current_position}, {new_shape, new_position}}] ->
+        {new_shape, new_position}
+    end
+  end
+
   def get_next(shape, current_position) do
     options =
       if shape == [2, 2] do
