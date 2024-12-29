@@ -39,6 +39,8 @@ defmodule ContextKeeper do
     GenServer.call(__MODULE__, :get_vocabulary)
   end
 
+  # todo make this not just pairs but context of any length.
+  # In ortho this can be accomplished by reading back to the edge and not differentiating by length
   def get_pairs() do
     GenServer.call(__MODULE__, :get_pairs)
   end

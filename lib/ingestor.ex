@@ -33,6 +33,7 @@ defmodule Ingestor do
     WorkServer.new_version()
 
     # todo push this filter down into the context keeper - get_remediations is causing a crash as it is too big to transfer in five seconds
+    # also don't feed in relevant remediation pairs. Just give it pairs.
     all_remediations = ContextKeeper.get_remediations()
     remediations =
       Enum.filter(all_remediations, fn {_, pair} ->
