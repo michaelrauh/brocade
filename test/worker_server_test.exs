@@ -37,10 +37,9 @@ defmodule WorkerServerTest do
   end
 
   test "searches for results and writes new ones back to context and the workserver" do
-    context = MapSet.new([Pair.new("a", "b")])
     ortho = Ortho.new()
-    {:ok, ortho} = Ortho.add(ortho, "a", context)
-    {:ok, ortho} = Ortho.add(ortho, "b", context)
+    ortho = Ortho.add(ortho, "a")
+    ortho = Ortho.add(ortho, "b")
 
     WorkServer.push(Ortho.new())
     ContextKeeper.add_pairs([Pair.new("a", "b")])

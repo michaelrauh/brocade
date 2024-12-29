@@ -95,7 +95,9 @@ defmodule WorkerServer do
 
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
-            missing_required = Enum.find(required, &(!MapSet.member?(state.pairs, Pair.new(&1, word))))
+            missing_required =
+              Enum.find(required, &(!MapSet.member?(state.pairs, Pair.new(&1, word))))
+
             if missing_required do
               {cands, [{top, Pair.new(missing_required, word)} | rems]}
             else
@@ -105,10 +107,7 @@ defmodule WorkerServer do
 
         new_orthos =
           Enum.map(candidates, fn word ->
-            case Ortho.add(top, word, state.pairs) do
-              {:ok, ortho} -> ortho
-              _ -> nil
-            end
+            Ortho.add(top, word)
           end)
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
@@ -117,35 +116,9 @@ defmodule WorkerServer do
         process_work(state)
 
       {:error, _top, _version} ->
-        # IO.inspect("queue is empty...")
+        IO.inspect("queue is empty...")
         Process.send_after(WorkerServer, :retry_process, 5_000)
         state
     end
-  end
-
-  defp attempt_ortho_adds(word, top, pairs) do
-    case Ortho.add(top, word, pairs) do
-      {:ok, new_item} ->
-        {:ortho, new_item}
-
-      {:error, missing_pair} ->
-        {:remediation, top, missing_pair}
-
-      {:diag, _extra_word_in_shell} ->
-        nil
-    end
-  end
-
-  defp get_orthos_and_remediations(top, pairs, vocabulary) do
-    vocabulary
-    |> Enum.map(&attempt_ortho_adds(&1, top, pairs))
-    |> Enum.reject(&is_nil/1)
-    |> Enum.reduce({[], []}, fn
-      {:ortho, x}, {orthos, remediations} ->
-        {[x | orthos], remediations}
-
-      {:remediation, ortho, pair}, {orthos, remediations} ->
-        {orthos, [{ortho, pair} | remediations]}
-    end)
   end
 end

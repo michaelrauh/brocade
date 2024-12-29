@@ -81,27 +81,18 @@ defmodule ContextKeeperTest do
   end
 
   test "it can take in orthos and not duplicate them by hash" do
-    context =
-      MapSet.new([
-        Pair.new("a", "b"),
-        Pair.new("c", "d"),
-        Pair.new("a", "c"),
-        Pair.new("b", "d"),
-        Pair.new("a", "e")
-      ])
-
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    {:ok, ortho1} = Ortho.add(ortho1, "a", context)
-    {:ok, ortho2} = Ortho.add(ortho2, "a", context)
+    ortho1 = Ortho.add(ortho1, "a")
+    ortho2 = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    {:ok, ortho1} = Ortho.add(ortho1, "b", context)
-    {:ok, ortho2} = Ortho.add(ortho2, "c", context)
+    ortho1 = Ortho.add(ortho1, "b")
+    ortho2 = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
-    {:ok, ortho1} = Ortho.add(ortho1, "c", context)
-    {:ok, ortho2} = Ortho.add(ortho2, "b", context)
+    ortho1 = Ortho.add(ortho1, "c")
+    ortho2 = Ortho.add(ortho2, "b")
     assert ortho1.id == ortho2.id
 
     ContextKeeper.add_orthos([ortho1, ortho2])
@@ -112,23 +103,14 @@ defmodule ContextKeeperTest do
   end
 
   test "it gives back new orthos that are not duplicate by hash on add" do
-    context =
-      MapSet.new([
-        Pair.new("a", "b"),
-        Pair.new("c", "d"),
-        Pair.new("a", "c"),
-        Pair.new("b", "d"),
-        Pair.new("a", "e")
-      ])
-
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    {:ok, ortho1} = Ortho.add(ortho1, "a", context)
-    {:ok, ortho2} = Ortho.add(ortho2, "a", context)
+    ortho1 = Ortho.add(ortho1, "a")
+    ortho2 = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    {:ok, ortho1} = Ortho.add(ortho1, "b", context)
-    {:ok, ortho2} = Ortho.add(ortho2, "c", context)
+    ortho1 = Ortho.add(ortho1, "b")
+    ortho2 = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
     ContextKeeper.add_orthos([ortho1])
@@ -139,33 +121,25 @@ defmodule ContextKeeperTest do
   end
 
   test "it accepts near misses mapped to the effected orthos" do
-    context = MapSet.new()
     ortho = Ortho.new()
-    {:ok, ortho} = Ortho.add(ortho, "a", context)
-    {status, remediation} = Ortho.add(ortho, "b", context)
-    assert status == :error
-    assert remediation == Pair.new("a", "b")
+    ortho = Ortho.add(ortho, "a")
 
-    ContextKeeper.add_remediations([{ortho, remediation}])
+    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}])
 
-    assert ContextKeeper.get_remediations() == [{ortho, remediation}]
+    assert ContextKeeper.get_remediations() == [{ortho, Pair.new("a", "b")}]
 
     ContextKeeper.stop()
   end
 
   test "it can remove remediations" do
-    context = MapSet.new()
     ortho = Ortho.new()
-    {:ok, ortho} = Ortho.add(ortho, "a", context)
-    {status, remediation} = Ortho.add(ortho, "b", context)
-    assert status == :error
-    assert remediation == Pair.new("a", "b")
+    ortho = Ortho.add(ortho, "a")
 
-    ContextKeeper.add_remediations([{ortho, remediation}])
+    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}])
 
-    assert ContextKeeper.get_remediations() == [{ortho, remediation}]
+    assert ContextKeeper.get_remediations() == [{ortho, Pair.new("a", "b")}]
 
-    ContextKeeper.remove_remediations([remediation])
+    ContextKeeper.remove_remediations([Pair.new("a", "b")])
 
     assert ContextKeeper.get_remediations() == []
 

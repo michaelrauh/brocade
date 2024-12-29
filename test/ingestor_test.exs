@@ -14,20 +14,11 @@ defmodule IngestorTest do
   end
 
   test "it can find results" do
-    context =
-      MapSet.new([
-        Pair.new("a", "b"),
-        Pair.new("c", "d"),
-        Pair.new("a", "c"),
-        Pair.new("b", "d"),
-        Pair.new("a", "e")
-      ])
-
     ortho = Ortho.new()
-    {:ok, ortho} = Ortho.add(ortho, "a", context)
-    {:ok, ortho} = Ortho.add(ortho, "b", context)
-    {:ok, ortho} = Ortho.add(ortho, "c", context)
-    {:ok, ortho} = Ortho.add(ortho, "d", context)
+    ortho = Ortho.add(ortho, "a")
+    ortho = Ortho.add(ortho, "b")
+    ortho = Ortho.add(ortho, "c")
+    ortho = Ortho.add(ortho, "d")
     :ok = Ingestor.ingest("a b. c d. a c. b d.")
     WorkerServer.process()
     assert_receive :worker_server_done

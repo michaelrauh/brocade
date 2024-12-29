@@ -7,43 +7,6 @@ defmodule Ortho do
     %Ortho{counter: Counter.new()}
   end
 
-  def example do
-    :eflame.apply(
-      fn ->
-        # Generate a flame graph of a single function call
-
-        context = MapSet.new()
-        ortho = Ortho.new()
-        {:ok, ortho} = Ortho.add(ortho, "a", context)
-        {_status, _remediation} = Ortho.add(ortho, "b", context)
-
-        context = MapSet.new([Pair.new("a", "b")])
-
-        ortho = Ortho.new()
-        {:ok, ortho} = Ortho.add(ortho, "a", context)
-        {:ok, ortho} = Ortho.add(ortho, "b", context)
-        {:diag, _reason} = Ortho.add(ortho, "b", context)
-
-        context =
-          MapSet.new([
-            Pair.new("a", "b"),
-            Pair.new("c", "d"),
-            Pair.new("a", "c"),
-            Pair.new("b", "d"),
-            Pair.new("a", "e")
-          ])
-
-        ortho = Ortho.new()
-        {:ok, ortho} = Ortho.add(ortho, "a", context)
-        {:ok, ortho} = Ortho.add(ortho, "b", context)
-        {:ok, ortho} = Ortho.add(ortho, "c", context)
-        {:ok, ortho} = Ortho.add(ortho, "d", context)
-        {:ok, _ortho} = Ortho.add(ortho, "e", context)
-      end,
-      []
-    )
-  end
-
   def previous_positions(position) do
     position
     |> Enum.with_index()
@@ -70,33 +33,11 @@ defmodule Ortho do
     {forbidden, required}
   end
 
-  # Todo remove checks
-  def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
+  def add(%Ortho{grid: grid, counter: counter} = ortho, item) do
     {next_position, new_counter} = Counter.increment(counter)
-    shell = Enum.sum(next_position)
-    forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
-
-    if MapSet.member?(forbidden, item) do
-      {:diag, {shell, item}}
-    else
-      grid = optionally_pad_grid(grid, next_position)
-
-      case search_for_missing_pair(grid, next_position, context, item) do
-        nil ->
-          new_grid = Map.put(grid, next_position, item)
-          {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
-
-        missing_pair ->
-          {:error, missing_pair}
-      end
-    end
-  end
-
-  defp search_for_missing_pair(grid, next_position, context, item) do
-    previous_positions(next_position)
-    |> Enum.map(&Map.get(grid, &1))
-    |> Enum.map(&Pair.new(&1, item))
-    |> Enum.find(&(not MapSet.member?(context, &1)))
+    grid = optionally_pad_grid(grid, next_position)
+    new_grid = Map.put(grid, next_position, item)
+    %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}
   end
 
   defp find_all_pair_prefixes(grid, next_position) do
