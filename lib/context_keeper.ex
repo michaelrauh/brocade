@@ -133,12 +133,9 @@ defmodule ContextKeeper do
 
   def handle_call({:get_relevant_remediations, pairs}, _from, state) do
     relevant_remediations =
-      Enum.reduce(pairs, [], fn %Pair{first: f, second: s}, acc ->
-        case :ets.lookup(@remediation_table_name, {f, s}) do
-          [{_, ortho_id}] -> [{ortho_id, Pair.new(f, s)} | acc]
-          l -> Enum.reduce(l, acc, fn {_, ortho_id}, acc -> [{ortho_id, Pair.new(f, s)} | acc] end)
-          _ -> acc
-        end
+      Enum.flat_map(pairs, fn %Pair{first: f, second: s} ->
+        :ets.lookup(@remediation_table_name, {f, s})
+        |> Enum.map(fn {_, ortho_id} -> {ortho_id, Pair.new(f, s)} end)
       end)
 
     {:reply, relevant_remediations, state}

@@ -137,7 +137,16 @@ defmodule ContextKeeperTest do
 
     ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}, {ortho, Pair.new("a", "b")}, {ortho3, Pair.new("f", "g")}])
 
-    assert ContextKeeper.get_relevant_remediations([Pair.new("a", "b")]) == [{ortho2.id, Pair.new("a", "b")}, {ortho.id, Pair.new("a", "b")}]
+    assert ContextKeeper.get_relevant_remediations([Pair.new("a", "b")]) == [{ortho.id, Pair.new("a", "b")}, {ortho2.id, Pair.new("a", "b")}]
+
+    ContextKeeper.stop()
+    Counter.stop()
+  end
+
+  test "it can get remediations and handle nothing found" do
+    Counter.start()
+
+    assert ContextKeeper.get_relevant_remediations([]) == []
 
     ContextKeeper.stop()
     Counter.stop()
