@@ -27,14 +27,14 @@ defmodule Ingestor do
   def handle_call({:ingest, input}, _from, state) do
     pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> %Pair{first: f, second: s} end)
     vocabulary = Splitter.vocabulary(input)
-    ContextKeeper.add_pairs(pairs)
+    new_pairs = ContextKeeper.add_pairs(pairs)
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
 
     # todo consider making these casts
     # todo consider combining calls into the server
     # todo only pass in new pairs here
-    ortho_id_pair_list = ContextKeeper.get_relevant_remediations(pairs)
+    ortho_id_pair_list = ContextKeeper.get_relevant_remediations(new_pairs)
     remediation_ortho_ids = Enum.map(ortho_id_pair_list, fn {ortho_id, _pair} -> ortho_id end)
     remediation_orthos = ContextKeeper.get_orthos_by_id(remediation_ortho_ids)
     remediation_pairs = Enum.map(ortho_id_pair_list, fn {_ortho_id, pair} -> pair end)
