@@ -33,10 +33,10 @@ defmodule Ingestor do
 
     # todo consider making these casts
     # todo consider combining calls into the server
-    remediations = ContextKeeper.get_relevant_remediations(pairs)
-    remediation_ortho_ids = Enum.map(remediations, fn {_pair, ortho} -> ortho.id end)
+    ortho_id_pair_list = ContextKeeper.get_relevant_remediations(pairs)
+    remediation_ortho_ids = Enum.map(ortho_id_pair_list, fn {ortho_id, _pair} -> ortho_id end)
     remediation_orthos = ContextKeeper.get_orthos_by_id(remediation_ortho_ids)
-    remediation_pairs = Enum.map(remediations, fn {pair, _ortho} -> pair end)
+    remediation_pairs = Enum.map(ortho_id_pair_list, fn {_ortho_id, pair} -> pair end)
 
     WorkServer.push(remediation_orthos)
     WorkServer.push(Ortho.new())
