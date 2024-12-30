@@ -58,7 +58,7 @@ defmodule ContextKeeper do
     :ets.new(@pair_table_name, [:named_table, :set, :public])
     :ets.new(@vocabulary_table_name, [:named_table, :set, :public])
     :ets.new(@ortho_table_name, [:named_table, :set, :public])
-    :ets.new(@remediation_table_name, [:named_table, :set, :public])
+    :ets.new(@remediation_table_name, [:named_table, :bag, :public])
     {:ok, %{}}
   end
 
@@ -106,10 +106,11 @@ defmodule ContextKeeper do
     {:reply, new_orthos, state}
   end
 
+  # todo remove return and look at other returns in here too
   def handle_call({:add_remediations, remediations}, _from, state) do
     new_remediations =
       Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = pair}, acc ->
-        case :ets.insert_new(@remediation_table_name, {{f, s}, ortho.id}) do
+        case :ets.insert(@remediation_table_name, {{f, s}, ortho.id}) do
           true -> [{ortho.id, pair} | acc]
           false -> acc
         end

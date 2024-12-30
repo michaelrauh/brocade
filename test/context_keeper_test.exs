@@ -116,7 +116,7 @@ defmodule ContextKeeperTest do
     ortho2 = Ortho.new()
     ortho2 = Ortho.add(ortho, "b")
 
-    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}])
+    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}, {ortho, Pair.new("a", "b")}])
 
     assert ContextKeeper.get_remediations() == [{ortho.id, Pair.new("a", "b")}, {ortho2.id, Pair.new("a", "b")}]
 
