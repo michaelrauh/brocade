@@ -1,5 +1,4 @@
-example.txt
-example2.txt
+example*.txt
 # The directory Mix will write compiled artifacts to.
 /_build/
 

@@ -24,6 +24,7 @@ defmodule Ingestor do
     end
   end
 
+  # todo make this a cast
   def handle_call({:ingest, input}, _from, state) do
     pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> %Pair{first: f, second: s} end)
     vocabulary = Splitter.vocabulary(input)
