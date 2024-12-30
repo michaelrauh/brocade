@@ -31,6 +31,10 @@ defmodule ContextKeeper do
     GenServer.call(__MODULE__, {:add_remediations, remediations})
   end
 
+  def get_relevant_remediations(pairs) do
+    GenServer.call(__MODULE__, {:get_relevant_remediations, pairs})
+  end
+
   def get_remediations() do
     GenServer.call(__MODULE__, :get_remediations)
   end
@@ -125,6 +129,19 @@ defmodule ContextKeeper do
       |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
 
     {:reply, remediations, state}
+  end
+
+  def handle_call({:get_relevant_remediations, pairs}, _from, state) do
+    relevant_remediations =
+      Enum.reduce(pairs, [], fn %Pair{first: f, second: s}, acc ->
+        case :ets.lookup(@remediation_table_name, {f, s}) do
+          [{_, ortho_id}] -> [{ortho_id, Pair.new(f, s)} | acc]
+          l -> Enum.reduce(l, acc, fn {_, ortho_id}, acc -> [{ortho_id, Pair.new(f, s)} | acc] end)
+          _ -> acc
+        end
+      end)
+
+    {:reply, relevant_remediations, state}
   end
 
   def handle_call(:get_vocabulary, _from, state) do

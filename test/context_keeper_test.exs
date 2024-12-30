@@ -124,6 +124,25 @@ defmodule ContextKeeperTest do
     Counter.stop()
   end
 
+  test "it can get remediations matching keys including duplicates" do
+    Counter.start()
+    ortho = Ortho.new()
+    ortho = Ortho.add(ortho, "a")
+
+    ortho2 = Ortho.new()
+    ortho2 = Ortho.add(ortho, "b")
+
+    ortho3 = Ortho.new()
+    ortho3 = Ortho.add(ortho, "c")
+
+    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}, {ortho, Pair.new("a", "b")}, {ortho3, Pair.new("f", "g")}])
+
+    assert ContextKeeper.get_relevant_remediations([Pair.new("a", "b")]) == [{ortho2.id, Pair.new("a", "b")}, {ortho.id, Pair.new("a", "b")}]
+
+    ContextKeeper.stop()
+    Counter.stop()
+  end
+
   test "it can remove remediations" do
     Counter.start()
     ortho = Ortho.new()
