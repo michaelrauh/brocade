@@ -64,22 +64,6 @@ defmodule ContextKeeperTest do
     ContextKeeper.stop()
   end
 
-  test "it can take a list of remediations and return remediations that are impacted by context" do
-    ContextKeeper.add_pairs([
-      Pair.new("a", "b"),
-      Pair.new("a", "c"),
-      Pair.new("c", "d"),
-      Pair.new("c", "e"),
-      Pair.new("e", "f")
-    ])
-
-    res =
-      ContextKeeper.get_relevant_context_for_remediations([Pair.new("c", "d"), Pair.new("g", "h")])
-
-    assert res == [Pair.new("c", "d")]
-    ContextKeeper.stop()
-  end
-
   test "it can take in orthos and not duplicate them by hash" do
     Counter.start()
     ortho1 = Ortho.new()
@@ -124,14 +108,17 @@ defmodule ContextKeeperTest do
     Counter.stop()
   end
 
-  test "it accepts near misses mapped to the effected orthos" do
+  test "it accepts remediations with duplicates by pair" do
     Counter.start()
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
-    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}])
+    ortho2 = Ortho.new()
+    ortho2 = Ortho.add(ortho, "b")
 
-    assert ContextKeeper.get_remediations() == [{ortho, Pair.new("a", "b")}]
+    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}])
+
+    assert ContextKeeper.get_remediations() == [{ortho.id, Pair.new("a", "b")}, {ortho2.id, Pair.new("a", "b")}]
 
     ContextKeeper.stop()
     Counter.stop()
@@ -144,7 +131,7 @@ defmodule ContextKeeperTest do
 
     ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}])
 
-    assert ContextKeeper.get_remediations() == [{ortho, Pair.new("a", "b")}]
+    assert ContextKeeper.get_remediations() == [{ortho.id, Pair.new("a", "b")}]
 
     ContextKeeper.remove_remediations([Pair.new("a", "b")])
 

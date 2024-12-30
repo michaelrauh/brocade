@@ -49,10 +49,6 @@ defmodule ContextKeeper do
     GenServer.call(__MODULE__, :get_orthos)
   end
 
-  def get_relevant_context_for_remediations(remediations) do
-    GenServer.call(__MODULE__, {:get_relevant_context_for_remediations, remediations})
-  end
-
   def remove_remediations(remediations) do
     GenServer.call(__MODULE__, {:remove_remediations, remediations})
   end
@@ -112,9 +108,9 @@ defmodule ContextKeeper do
 
   def handle_call({:add_remediations, remediations}, _from, state) do
     new_remediations =
-      Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = remediation}, acc ->
-        case :ets.insert_new(@remediation_table_name, {{f, s}, ortho}) do
-          true -> [{ortho, remediation} | acc]
+      Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = pair}, acc ->
+        case :ets.insert_new(@remediation_table_name, {{f, s}, ortho.id}) do
+          true -> [{ortho.id, pair} | acc]
           false -> acc
         end
       end)
@@ -145,18 +141,8 @@ defmodule ContextKeeper do
     {:reply, orthos, state}
   end
 
-  def handle_call({:get_relevant_context_for_remediations, remediations}, _from, state) do
-    relevant_context =
-      remediations
-      |> Enum.filter(fn %Pair{first: f, second: s} ->
-        :ets.member(@pair_table_name, {f, s})
-      end)
-
-    {:reply, relevant_context, state}
-  end
-
-  def handle_call({:remove_remediations, remediations}, _from, state) do
-    Enum.each(remediations, fn %Pair{first: f, second: s} ->
+  def handle_call({:remove_remediations, pairs}, _from, state) do
+    Enum.each(pairs, fn %Pair{first: f, second: s} ->
       :ets.delete(@remediation_table_name, {f, s})
     end)
 
