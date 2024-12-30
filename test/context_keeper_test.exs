@@ -46,24 +46,6 @@ defmodule ContextKeeperTest do
     ContextKeeper.stop()
   end
 
-  test "it can return which words were new when adding" do
-    ContextKeeper.add_vocabulary([
-      "a",
-      "b",
-      "b",
-      "c"
-    ])
-
-    assert ContextKeeper.add_vocabulary([
-             "a",
-             "b",
-             "c",
-             "d"
-           ]) == ["d"]
-
-    ContextKeeper.stop()
-  end
-
   test "it can take in orthos and not duplicate them by hash" do
     Counter.start()
     ortho1 = Ortho.new()

@@ -91,15 +91,11 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:add_vocabulary, words}, _from, state) do
-    new_words =
-      Enum.reduce(words, [], fn word, acc ->
-        case :ets.insert_new(@vocabulary_table_name, {word}) do
-          true -> [word | acc]
-          false -> acc
-        end
-      end)
+    Enum.each(words, fn word ->
+      :ets.insert_new(@vocabulary_table_name, {word})
+    end)
 
-    {:reply, new_words, state}
+    {:reply, :ok, state}
   end
 
   def handle_call({:add_orthos, orthos}, _from, state) do
@@ -114,17 +110,12 @@ defmodule ContextKeeper do
     {:reply, new_orthos, state}
   end
 
-  # todo remove return and look at other returns in here too
   def handle_call({:add_remediations, remediations}, _from, state) do
-    new_remediations =
-      Enum.reduce(remediations, [], fn {ortho, %Pair{first: f, second: s} = pair}, acc ->
-        case :ets.insert(@remediation_table_name, {{f, s}, ortho.id}) do
-          true -> [{ortho.id, pair} | acc]
-          false -> acc
-        end
-      end)
+    Enum.each(remediations, fn {ortho, %Pair{first: f, second: s}} ->
+      :ets.insert(@remediation_table_name, {{f, s}, ortho.id})
+    end)
 
-    {:reply, new_remediations, state}
+    {:reply, :ok, state}
   end
 
   def handle_call(:get_remediations, _from, state) do
