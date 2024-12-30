@@ -53,6 +53,10 @@ defmodule ContextKeeper do
     GenServer.call(__MODULE__, :get_orthos)
   end
 
+  def get_orthos_by_id(ids) do
+    GenServer.call(__MODULE__, {:get_orthos_by_id, ids})
+  end
+
   def remove_remediations(remediations) do
     GenServer.call(__MODULE__, {:remove_remediations, remediations})
   end
@@ -153,6 +157,15 @@ defmodule ContextKeeper do
 
   def handle_call(:get_orthos, _from, state) do
     orthos = :ets.tab2list(@ortho_table_name) |> Enum.map(fn {_key, val} -> val end)
+    {:reply, orthos, state}
+  end
+
+  def handle_call({:get_orthos_by_id, ids}, _from, state) do
+    orthos = Enum.map(ids, fn id ->
+      case :ets.lookup(@ortho_table_name, id) do
+        [{_, ortho}] -> ortho
+      end
+    end)
     {:reply, orthos, state}
   end
 

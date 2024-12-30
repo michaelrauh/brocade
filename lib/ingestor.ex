@@ -31,12 +31,11 @@ defmodule Ingestor do
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
 
-    # todo push this filter down into the context keeper - get_remediations is causing a crash as it is too big to transfer in five seconds
-    # also don't feed in relevant remediation pairs. Just give it pairs.
-    # Also have remediations only map pairs to ortho IDs. If orthos are needed they can be gotten separately. Make sure to hold these as a bag unless using the whole thing as a key
+    # todo consider making these casts
+    # todo consider combining calls into the server
     remediations = ContextKeeper.get_relevant_remediations(pairs)
     remediation_ortho_ids = Enum.map(remediations, fn {_pair, ortho} -> ortho.id end)
-    remediation_orthos = ContextKeeper.get_orthos(remediation_ortho_ids)
+    remediation_orthos = ContextKeeper.get_orthos_by_id(remediation_ortho_ids)
     remediation_pairs = Enum.map(remediations, fn {pair, _ortho} -> pair end)
 
     WorkServer.push(remediation_orthos)

@@ -108,6 +108,26 @@ defmodule ContextKeeperTest do
     Counter.stop()
   end
 
+  test "it gets orthos by id" do
+    Counter.start()
+    ortho1 = Ortho.new()
+    ortho2 = Ortho.new()
+    ortho1 = Ortho.add(ortho1, "a")
+    ortho2 = Ortho.add(ortho2, "a")
+    assert ortho1.id == ortho2.id
+
+    ortho1 = Ortho.add(ortho1, "b")
+    ortho2 = Ortho.add(ortho2, "c")
+    assert ortho1.id != ortho2.id
+
+    ContextKeeper.add_orthos([ortho1])
+
+    assert ContextKeeper.get_orthos_by_id([ortho1.id]) == [ortho1]
+
+    ContextKeeper.stop()
+    Counter.stop()
+  end
+
   test "it accepts remediations with duplicates by pair" do
     Counter.start()
     ortho = Ortho.new()
