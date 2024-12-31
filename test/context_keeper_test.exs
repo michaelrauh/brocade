@@ -117,7 +117,11 @@ defmodule ContextKeeperTest do
 
     ortho2 = Ortho.add(ortho, "b")
 
-    ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}])
+    ContextKeeper.add_remediations([
+      {ortho, {"a", "b"}},
+      {ortho2, {"a", "b"}},
+      {ortho, {"a", "b"}}
+    ])
 
     assert ContextKeeper.get_remediations() == [{ortho.id, {"a", "b"}}, {ortho2.id, {"a", "b"}}]
 
@@ -134,9 +138,17 @@ defmodule ContextKeeperTest do
 
     ortho3 = Ortho.add(ortho, "c")
 
-    ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}, {ortho3, {"f", "g"}}])
+    ContextKeeper.add_remediations([
+      {ortho, {"a", "b"}},
+      {ortho2, {"a", "b"}},
+      {ortho, {"a", "b"}},
+      {ortho3, {"f", "g"}}
+    ])
 
-    assert ContextKeeper.get_relevant_remediations([{"a", "b"}]) == [{ortho.id, {"a", "b"}}, {ortho2.id, {"a", "b"}}]
+    assert ContextKeeper.get_relevant_remediations([{"a", "b"}]) == [
+             {ortho.id, {"a", "b"}},
+             {ortho2.id, {"a", "b"}}
+           ]
 
     ContextKeeper.stop()
     Counter.stop()

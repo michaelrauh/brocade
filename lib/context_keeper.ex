@@ -155,11 +155,13 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:get_orthos_by_id, ids}, _from, state) do
-    orthos = Enum.map(ids, fn id ->
-      case :ets.lookup(@ortho_table_name, id) do
-        [{_, ortho}] -> ortho
-      end
-    end)
+    orthos =
+      Enum.map(ids, fn id ->
+        case :ets.lookup(@ortho_table_name, id) do
+          [{_, ortho}] -> ortho
+        end
+      end)
+
     {:reply, orthos, state}
   end
 

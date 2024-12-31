@@ -1,5 +1,5 @@
 defmodule Ortho do
-  defstruct grid: %{}, shape: [2,2], position: [0,0], shell: 0, id: nil
+  defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
   alias Counter
 
@@ -22,7 +22,6 @@ defmodule Ortho do
 
   def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
     forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
-
     required = find_all_pair_prefixes(grid, position)
 
     {forbidden, required}
@@ -30,9 +29,18 @@ defmodule Ortho do
 
   def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
     {new_shape, next_position, shell} = Counter.increment(shape, position)
-    grid = optionally_pad_grid(grid, position)
+    grid = optionally_pad_grid(grid, shape, new_shape)
     new_grid = Map.put(grid, position, item)
-    %Ortho{ortho | grid: new_grid, position: next_position, shape: new_shape, shell: shell, id: calculate_id(new_grid)}
+    new_id = calculate_id(new_grid)
+
+    %Ortho{
+      ortho
+      | grid: new_grid,
+        position: next_position,
+        shape: new_shape,
+        shell: shell,
+        id: new_id
+    }
   end
 
   defp find_all_pair_prefixes(grid, next_position) do
@@ -40,9 +48,8 @@ defmodule Ortho do
     |> Enum.map(&Map.get(grid, &1))
   end
 
-  defp optionally_pad_grid(grid, next_position) do
-    # todo check the new shape to see if the grid should be padded
-    if Enum.count(List.first(Map.keys(grid), [0, 0])) != Enum.count(next_position) do
+  defp optionally_pad_grid(grid, shape, new_shape) do
+    if shape != new_shape do
       pad_grid(grid)
     else
       grid
