@@ -23,7 +23,6 @@ defmodule Ortho do
   def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
     forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
 
-    grid = optionally_pad_grid(grid, position)
     required = find_all_pair_prefixes(grid, position)
 
     {forbidden, required}
