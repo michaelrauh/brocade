@@ -9,7 +9,6 @@ defmodule Brocade.Application do
       {ContextKeeper, []}
     ]
 
-    # todo scale workers
     Counter.start()
     opts = [strategy: :one_for_one, name: Brocade.Supervisor]
     {:ok, pid} = Supervisor.start_link(children, opts)

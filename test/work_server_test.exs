@@ -17,7 +17,7 @@ defmodule WorkServerTest do
 
   test "it will show empty if there is no work" do
     {status, top, version} = WorkServer.pop()
-    assert status == :error
+    assert status == :empty
     assert top == nil
     assert version == 0
   end
@@ -30,7 +30,7 @@ defmodule WorkServerTest do
   end
 
   test "it can be notified of version updates and subsequent work will have a different version" do
-    {:error, nil, version} = WorkServer.pop()
+    {:empty, nil, version} = WorkServer.pop()
     assert version == 0
     :ok = WorkServer.push("one")
     :ok = WorkServer.new_version()
