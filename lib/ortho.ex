@@ -21,7 +21,7 @@ defmodule Ortho do
   end
 
   def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
-    forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
+    forbidden = get_others_in_same_shell(grid, shell)
     required = find_all_pair_prefixes(grid, position)
 
     {forbidden, required}
@@ -56,18 +56,11 @@ defmodule Ortho do
     end
   end
 
-  # todo memoize the parts of this that are common to all orthos
-  defp calculate_diagonals(grid) do
-    Enum.reduce(Map.keys(grid), %{}, fn key, acc ->
-      distance = Enum.sum(key)
-
-      Map.update(
-        acc,
-        distance,
-        MapSet.new([Map.get(grid, key)]),
-        &MapSet.put(&1, Map.get(grid, key))
-      )
-    end)
+  defp get_others_in_same_shell(grid, shell) do
+    grid
+    |> Enum.filter(fn {pos, _val} -> Enum.sum(pos) == shell end)
+    |> Enum.map(fn {_pos, val} -> val end)
+    |> MapSet.new()
   end
 
   # todo speed this up
