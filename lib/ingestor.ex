@@ -24,7 +24,7 @@ defmodule Ingestor do
     end
   end
 
-  # todo make this a cast
+  # todo make this a async (spawn task in call and call back)
   def handle_call({:ingest, input}, _from, state) do
     pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> %Pair{first: f, second: s} end)
     vocabulary = Splitter.vocabulary(input)
@@ -32,7 +32,7 @@ defmodule Ingestor do
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
 
-    # todo consider making these casts
+    # todo consider making these async (spawn task in call and call back)
     # todo consider combining calls into the server
     ortho_id_pair_list = ContextKeeper.get_relevant_remediations(new_pairs)
     remediation_ortho_ids = Enum.map(ortho_id_pair_list, fn {ortho_id, _pair} -> ortho_id end)
