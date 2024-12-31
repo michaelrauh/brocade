@@ -26,7 +26,7 @@ defmodule Ingestor do
 
   # todo make this a async (spawn task in call and call back)
   def handle_call({:ingest, input}, _from, state) do
-    pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> %Pair{first: f, second: s} end)
+    pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> {f, s} end)
     vocabulary = Splitter.vocabulary(input)
     new_pairs = ContextKeeper.add_pairs(pairs)
     ContextKeeper.add_vocabulary(vocabulary)

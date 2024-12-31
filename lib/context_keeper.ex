@@ -83,8 +83,8 @@ defmodule ContextKeeper do
 
   def handle_call({:add_pairs, pairs}, _from, state) do
     new_pairs =
-      Enum.reduce(pairs, [], fn %Pair{first: f, second: s} = pair, acc ->
-        case :ets.insert_new(@pair_table_name, {{f, s}, pair}) do
+      Enum.reduce(pairs, [], fn pair, acc ->
+        case :ets.insert_new(@pair_table_name, {pair, pair}) do # todo consider not duplicating here
           true -> [pair | acc]
           false -> acc
         end
@@ -113,8 +113,8 @@ defmodule ContextKeeper do
     {:reply, new_orthos, state}
   end
 
-  def handle_call({:add_remediations, remediations}, _from, state) do
-    Enum.each(remediations, fn {ortho, %Pair{first: f, second: s}} ->
+  def handle_call({:add_remediations, pairs}, _from, state) do
+    Enum.each(pairs, fn {ortho, {f, s}} ->
       :ets.insert(@remediation_table_name, {{f, s}, ortho.id})
     end)
 
@@ -124,16 +124,16 @@ defmodule ContextKeeper do
   def handle_call(:get_remediations, _from, state) do
     remediations =
       :ets.tab2list(@remediation_table_name)
-      |> Enum.map(fn {{f, s}, val} -> {val, Pair.new(f, s)} end)
+      |> Enum.map(fn {pair, val} -> {val, pair} end)
 
     {:reply, remediations, state}
   end
 
   def handle_call({:get_relevant_remediations, pairs}, _from, state) do
     relevant_remediations =
-      Enum.flat_map(pairs, fn %Pair{first: f, second: s} ->
-        :ets.lookup(@remediation_table_name, {f, s})
-        |> Enum.map(fn {_, ortho_id} -> {ortho_id, Pair.new(f, s)} end)
+      Enum.flat_map(pairs, fn pair ->
+        :ets.lookup(@remediation_table_name, pair)
+        |> Enum.map(fn {_, ortho_id} -> {ortho_id, pair} end)
       end)
 
     {:reply, relevant_remediations, state}
@@ -164,8 +164,8 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:remove_remediations, pairs}, _from, state) do
-    Enum.each(pairs, fn %Pair{first: f, second: s} ->
-      :ets.delete(@remediation_table_name, {f, s})
+    Enum.each(pairs, fn pair ->
+      :ets.delete(@remediation_table_name, pair)
     end)
 
     {:reply, :ok, state}

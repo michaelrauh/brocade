@@ -9,12 +9,12 @@ defmodule ContextKeeperTest do
 
   test "it can take multiple values at once" do
     ContextKeeper.add_pairs([
-      Pair.new("a", "b"),
-      Pair.new("a", "b"),
-      Pair.new("c", "d")
+      {"a", "b"},
+      {"a", "b"},
+      {"c", "d"}
     ])
 
-    assert ContextKeeper.get_pairs() == [Pair.new("a", "b"), Pair.new("c", "d")]
+    assert ContextKeeper.get_pairs() == [{"a", "b"}, {"c", "d"}]
     ContextKeeper.stop()
   end
 
@@ -32,16 +32,16 @@ defmodule ContextKeeperTest do
 
   test "it can return which pairs were new when adding" do
     ContextKeeper.add_pairs([
-      Pair.new("a", "b"),
-      Pair.new("a", "b"),
-      Pair.new("c", "d")
+      {"a", "b"},
+      {"a", "b"},
+      {"c", "d"}
     ])
 
     assert ContextKeeper.add_pairs([
-             Pair.new("a", "b"),
-             Pair.new("c", "d"),
-             Pair.new("e", "f")
-           ]) == [Pair.new("e", "f")]
+             {"a", "b"},
+             {"c", "d"},
+             {"e", "f"}
+           ]) == [{"e", "f"}]
 
     ContextKeeper.stop()
   end
@@ -118,9 +118,9 @@ defmodule ContextKeeperTest do
     ortho2 = Ortho.new()
     ortho2 = Ortho.add(ortho, "b")
 
-    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}, {ortho, Pair.new("a", "b")}])
+    ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}])
 
-    assert ContextKeeper.get_remediations() == [{ortho.id, Pair.new("a", "b")}, {ortho2.id, Pair.new("a", "b")}]
+    assert ContextKeeper.get_remediations() == [{ortho.id, {"a", "b"}}, {ortho2.id, {"a", "b"}}]
 
     ContextKeeper.stop()
     Counter.stop()
@@ -137,9 +137,9 @@ defmodule ContextKeeperTest do
     ortho3 = Ortho.new()
     ortho3 = Ortho.add(ortho, "c")
 
-    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}, {ortho2, Pair.new("a", "b")}, {ortho, Pair.new("a", "b")}, {ortho3, Pair.new("f", "g")}])
+    ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}, {ortho3, {"f", "g"}}])
 
-    assert ContextKeeper.get_relevant_remediations([Pair.new("a", "b")]) == [{ortho.id, Pair.new("a", "b")}, {ortho2.id, Pair.new("a", "b")}]
+    assert ContextKeeper.get_relevant_remediations([{"a", "b"}]) == [{ortho.id, {"a", "b"}}, {ortho2.id, {"a", "b"}}]
 
     ContextKeeper.stop()
     Counter.stop()
@@ -159,11 +159,11 @@ defmodule ContextKeeperTest do
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
-    ContextKeeper.add_remediations([{ortho, Pair.new("a", "b")}])
+    ContextKeeper.add_remediations([{ortho, {"a", "b"}}])
 
-    assert ContextKeeper.get_remediations() == [{ortho.id, Pair.new("a", "b")}]
+    assert ContextKeeper.get_remediations() == [{ortho.id, {"a", "b"}}]
 
-    ContextKeeper.remove_remediations([Pair.new("a", "b")])
+    ContextKeeper.remove_remediations([{"a", "b"}])
 
     assert ContextKeeper.get_remediations() == []
 
