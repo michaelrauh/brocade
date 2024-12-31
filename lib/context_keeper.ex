@@ -84,7 +84,7 @@ defmodule ContextKeeper do
   def handle_call({:add_pairs, pairs}, _from, state) do
     new_pairs =
       Enum.reduce(pairs, [], fn pair, acc ->
-        case :ets.insert_new(@pair_table_name, {pair, pair}) do # todo consider not duplicating here
+        case :ets.insert_new(@pair_table_name, {pair, pair}) do
           true -> [pair | acc]
           false -> acc
         end
