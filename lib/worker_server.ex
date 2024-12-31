@@ -19,8 +19,7 @@ defmodule WorkerServer do
     GenServer.call(__MODULE__, :get_vocabulary)
   end
 
-  # todo convert this to a call so that it can respond immediately and get a handle on the pid - remove subscribe
-  # todo address issue that this will not be called if the server dies
+  # todo make this run on startup and integrate a way to subscribe and request response in one go for testing
   def process do
     GenServer.cast(__MODULE__, :process)
   end
@@ -85,7 +84,6 @@ defmodule WorkerServer do
 
   defp process_work(state) do
     # todo add message acknowledgement. If the worker dies during processing, the message will be lost
-    # if switching to rabbit, heartbeats will be necessary
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
 
@@ -94,6 +92,7 @@ defmodule WorkerServer do
         {forbidden, required} = Ortho.get_requirements(top)
         working_vocabulary = Enum.reject(state.vocabulary, &MapSet.member?(forbidden, &1))
 
+        # todo do not create pairs just for checking against them. Index by prefixes and check against what comes back directly
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
             missing_required =
