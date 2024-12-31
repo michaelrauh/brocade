@@ -1,5 +1,5 @@
 defmodule SplitterTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   alias Splitter
 
   test "splines filter sentences with more than 2 words" do

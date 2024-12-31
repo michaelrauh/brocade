@@ -1,10 +1,10 @@
 defmodule Ortho do
-  defstruct grid: %{}, shape: [2,2], position: [0,0], id: nil
+  defstruct grid: %{}, shape: [2,2], position: [0,0], shell: 0, id: nil
 
   alias Counter
 
   def new() do
-    %Ortho{grid: %{}, shape: [2, 2], position: [0, 0], id: nil}
+    %Ortho{grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil}
   end
 
   def previous_positions(position) do
@@ -20,10 +20,7 @@ defmodule Ortho do
     end)
   end
 
-  def get_requirements(%Ortho{grid: grid, position: position}) do
-
-    # todo cache sum next position
-    shell = Enum.sum(position)
+  def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
     forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
 
     grid = optionally_pad_grid(grid, position)
@@ -33,10 +30,10 @@ defmodule Ortho do
   end
 
   def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
-    {new_shape, next_position} = Counter.increment(shape, position)
+    {new_shape, next_position, shell} = Counter.increment(shape, position)
     grid = optionally_pad_grid(grid, position)
     new_grid = Map.put(grid, position, item)
-    %Ortho{ortho | grid: new_grid, position: next_position, shape: new_shape, id: calculate_id(new_grid)}
+    %Ortho{ortho | grid: new_grid, position: next_position, shape: new_shape, shell: shell, id: calculate_id(new_grid)}
   end
 
   defp find_all_pair_prefixes(grid, next_position) do

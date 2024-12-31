@@ -33,8 +33,9 @@ defmodule WorkServer do
     {:reply, :ok, {work ++ stack, version}}
   end
 
+  # todo add logging levels
   def handle_call(:pop, _from, {[top | rest], version}) do
-    IO.inspect(length(rest) + 1)
+    # IO.inspect(length(rest) + 1)
     {:reply, {:ok, top, version}, {rest, version}}
   end
 

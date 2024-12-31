@@ -111,9 +111,9 @@ defmodule WorkerServer do
           end)
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
-        if new_orthos != [] do
-          IO.inspect(hd(new_orthos))
-        end
+        # if new_orthos != [] do
+        #   IO.inspect(hd(new_orthos))
+        # end
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
         process_work(state)

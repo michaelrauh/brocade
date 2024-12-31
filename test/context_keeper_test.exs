@@ -115,7 +115,6 @@ defmodule ContextKeeperTest do
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
-    ortho2 = Ortho.new()
     ortho2 = Ortho.add(ortho, "b")
 
     ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}])
@@ -131,10 +130,8 @@ defmodule ContextKeeperTest do
     ortho = Ortho.new()
     ortho = Ortho.add(ortho, "a")
 
-    ortho2 = Ortho.new()
     ortho2 = Ortho.add(ortho, "b")
 
-    ortho3 = Ortho.new()
     ortho3 = Ortho.add(ortho, "c")
 
     ContextKeeper.add_remediations([{ortho, {"a", "b"}}, {ortho2, {"a", "b"}}, {ortho, {"a", "b"}}, {ortho3, {"f", "g"}}])

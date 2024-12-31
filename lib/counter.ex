@@ -13,11 +13,12 @@ defmodule Counter do
     case :ets.lookup(@table_name, {shape, current_position}) do
       [] ->
         {new_shape, new_position} = get_next(shape, current_position)
-        :ets.insert(@table_name, {{shape, current_position}, {new_shape, new_position}})
-        {new_shape, new_position}
+        shell = Enum.sum(new_position)
+        :ets.insert(@table_name, {{shape, current_position}, {new_shape, new_position, shell}})
+        {new_shape, new_position, shell}
 
-      [{{_shape, _current_position}, {new_shape, new_position}}] ->
-        {new_shape, new_position}
+      [{{_shape, _current_position}, {new_shape, new_position, shell}}] ->
+        {new_shape, new_position, shell}
     end
   end
 
