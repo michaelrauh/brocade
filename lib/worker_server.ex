@@ -83,7 +83,6 @@ defmodule WorkerServer do
   end
 
   defp process_work(state) do
-    # todo add message acknowledgement. If the worker dies during processing, the message will be lost
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
 
@@ -92,7 +91,6 @@ defmodule WorkerServer do
         {forbidden, required} = Ortho.get_requirements(top)
         working_vocabulary = Enum.reject(state.vocabulary, &MapSet.member?(forbidden, &1))
 
-        # todo do not create pairs just for checking against them. Index by prefixes and check against what comes back directly
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
             missing_required =
@@ -111,9 +109,9 @@ defmodule WorkerServer do
           end)
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
-        # if new_orthos != [] do
-        #   IO.inspect(hd(new_orthos))
-        # end
+        if new_orthos != [] do
+        IO.inspect(hd(new_orthos))
+        end
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
         process_work(state)
