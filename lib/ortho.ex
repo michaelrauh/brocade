@@ -63,34 +63,29 @@ defmodule Ortho do
     |> MapSet.new()
   end
 
-  # todo speed this up
   defp calculate_id(grid) do
-    dimension = Enum.count(List.first(Map.keys(grid)))
-    permutations = permutations(Enum.to_list(0..(dimension - 1)))
+    one_hot_positions =
+      grid
+      |> Enum.filter(fn {coords, _} ->
+        coords
+        |> Enum.sum() == 1
+      end)
+      |> Enum.sort_by(fn {_, val} -> val end)
+      |> Enum.map(fn {coords, _} -> coords end)
 
-    canonical_forms =
-      for perm <- permutations do
-        grid
-        |> Enum.map(fn {pos, val} ->
-          new_pos =
-            Enum.with_index(pos)
-            |> Enum.sort_by(fn {_elem, index} -> Enum.find_index(perm, fn x -> x == index end) end)
-            |> Enum.map(&elem(&1, 0))
+    axis_order =
+      one_hot_positions
+      |> Enum.map(fn coords -> Enum.find_index(coords, &(&1 == 1)) end)
 
-          {new_pos, val}
-        end)
-        |> Enum.sort()
-      end
+    sorted_positions =
+      grid
+      |> Enum.sort_by(fn {coords, _} ->
+        Enum.map(axis_order, &Enum.at(coords, &1))
+      end) |> Enum.map(fn {_, val} -> val end)
 
-    canonical_form = Enum.min(canonical_forms)
-
-    :crypto.hash(:sha256, :erlang.term_to_binary(canonical_form))
-    |> Base.encode16()
-  end
-
-  defp permutations([]), do: [[]]
-
-  defp permutations(list) do
-    for x <- list, y <- permutations(list -- [x]), do: [x | y]
+    sorted_positions
+    |> :erlang.term_to_binary()
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
   end
 end

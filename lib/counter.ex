@@ -9,7 +9,6 @@ defmodule Counter do
     :ets.delete(@table_name)
   end
 
-  # todo add grid with grid padding in here and memoize
   def increment(shape, current_position) do
     case :ets.lookup(@table_name, {shape, current_position}) do
       [] ->
