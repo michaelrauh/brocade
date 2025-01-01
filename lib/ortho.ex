@@ -10,14 +10,12 @@ defmodule Ortho do
   def previous_positions(position) do
     position
     |> Enum.with_index()
-    |> Enum.map(&List.replace_at(position, elem(&1, 1), elem(&1, 0) - 1))
-    |> Enum.filter(fn pos -> Enum.all?(pos, fn x -> x >= 0 end) end)
+    |> Stream.filter(fn {val, _idx} -> val > 0 end)
+    |> Enum.map(fn {val, idx} -> List.replace_at(position, idx, val - 1) end)
   end
 
   def pad_grid(grid) do
-    Enum.reduce(grid, %{}, fn {key, value}, acc ->
-      Map.put(acc, [0 | key], value)
-    end)
+    Map.new(grid, fn {key, value} -> {[0 | key], value} end)
   end
 
   def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
@@ -29,7 +27,7 @@ defmodule Ortho do
 
   def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
     {new_shape, next_position, shell} = Counter.increment(shape, position)
-    grid = optionally_pad_grid(grid, shape, new_shape)
+    grid = if shape == new_shape, do: grid, else: pad_grid(grid)
     new_grid = Map.put(grid, position, item)
     new_id = calculate_id(new_grid)
 
@@ -48,28 +46,17 @@ defmodule Ortho do
     |> Enum.map(&Map.get(grid, &1))
   end
 
-  defp optionally_pad_grid(grid, shape, new_shape) do
-    if shape != new_shape do
-      pad_grid(grid)
-    else
-      grid
-    end
-  end
-
   defp get_others_in_same_shell(grid, shell) do
     grid
-    |> Enum.filter(fn {pos, _val} -> Enum.sum(pos) == shell end)
-    |> Enum.map(fn {_pos, val} -> val end)
-    |> MapSet.new()
+    |> Enum.reduce(MapSet.new(), fn {pos, val}, acc ->
+      if Enum.sum(pos) == shell, do: MapSet.put(acc, val), else: acc
+    end)
   end
 
   defp calculate_id(grid) do
     one_hot_positions =
       grid
-      |> Enum.filter(fn {coords, _} ->
-        coords
-        |> Enum.sum() == 1
-      end)
+      |> Enum.filter(fn {coords, _} -> Enum.sum(coords) == 1 end)
       |> Enum.sort_by(fn {_, val} -> val end)
       |> Enum.map(fn {coords, _} -> coords end)
 
@@ -81,7 +68,8 @@ defmodule Ortho do
       grid
       |> Enum.sort_by(fn {coords, _} ->
         Enum.map(axis_order, &Enum.at(coords, &1))
-      end) |> Enum.map(fn {_, val} -> val end)
+      end)
+      |> Enum.map(fn {_, val} -> val end)
 
     sorted_positions
     |> :erlang.term_to_binary()
