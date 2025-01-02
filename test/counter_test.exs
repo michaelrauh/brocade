@@ -18,13 +18,6 @@ defmodule CounterTest do
     assert next_position == [1, 0, 1]
     assert shape == [2, 2, 2]
 
-    Counter.increment([2, 2], [0, 0])
-    Counter.increment([2, 2], [0, 0])
-    Counter.increment([2, 2], [0, 0])
-    Counter.increment([2, 2], [0, 0])
-    Counter.increment([2, 2], [0, 0])
-    Counter.increment([2, 2], [0, 0])
-
     Counter.stop()
   end
 
