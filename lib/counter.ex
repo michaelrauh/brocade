@@ -28,19 +28,6 @@ defmodule Counter do
     desired = Enum.at(possibilities, current + 1)
 
     if desired == nil do
-      if Enum.all?(shape, fn x -> x == 2 end) do
-        # up on base
-        new_shape = [2 | shape]
-        new_possibilities = sorted_cartesian(new_shape)
-        used_possibilities = Enum.map(possibilities, fn x -> [0 | x] end)
-
-        desired =
-          new_possibilities
-          |> Enum.reject(fn x -> Enum.member?(used_possibilities, x) end)
-          |> List.first()
-
-        {:up, new_shape, desired}
-      else
         # over - later do both
         magnitudes = Enum.uniq(shape)
 
@@ -62,10 +49,24 @@ defmodule Counter do
           end)
 
         shapes_and_positions = Enum.zip(new_shapes, next_positions)
+        if Enum.all?(shape, fn x -> x == 2 end) do
+          # up on base
+          new_shape = [2 | shape]
+          new_possibilities = sorted_cartesian(new_shape)
+          used_possibilities = Enum.map(possibilities, fn x -> [0 | x] end)
+
+          desired =
+            new_possibilities
+            |> Enum.reject(fn x -> Enum.member?(used_possibilities, x) end)
+            |> List.first()
+
+          result_to_add = {new_shape, desired}
+          shapes_and_positions = shapes_and_positions ++ [result_to_add]
+          {:both, shapes_and_positions}
+        end
         {:over, shapes_and_positions}
-      end
     else
-      {:same, shape, desired}
+      {:same, [{shape, desired}]}
     end
   end
 
