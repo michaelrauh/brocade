@@ -3,18 +3,20 @@ defmodule CounterTest do
 
   alias Counter
 
-  test "can be incremented, skipping all already visited while increasing dimensionality in a branching up and over fashion and returning shell" do
-    assert {:same, [{[2, 2], [0, 1]}]} == (Counter.get_next([2, 2], [0, 0]))
-    assert {:same, [{[2, 2], [1, 0]}]} == (Counter.get_next([2, 2], [0, 1]))
-    assert {:same, [{[2, 2], [1, 1]}]} == (Counter.get_next([2, 2], [1, 0]))
-    assert {:both, [{[2, 2, 2], [1, 0, 0]}, {[3, 2], [2, 0]}]} == (Counter.get_next([2, 2], [1, 1]))
+  test "can be incremented, skipping all already visited while increasing dimensionality in a branching up and over fashion" do
+    assert {:same, [{[2, 2], [0, 1]}]} == Counter.get_next([2, 2], [0, 0])
+    assert {:same, [{[2, 2], [1, 0]}]} == Counter.get_next([2, 2], [0, 1])
+    assert {:same, [{[2, 2], [1, 1]}]} == Counter.get_next([2, 2], [1, 0])
+    assert {:both, [{[2, 2, 2], [1, 0, 0]}, {[3, 2], [2, 0]}]} == Counter.get_next([2, 2], [1, 1])
 
     # up result
     assert {:same, [{[2, 2, 2], [0, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 0, 0])
     assert {:same, [{[2, 2, 2], [1, 0, 1]}]} == Counter.get_next([2, 2, 2], [0, 1, 1])
     assert {:same, [{[2, 2, 2], [1, 1, 0]}]} == Counter.get_next([2, 2, 2], [1, 0, 1])
     assert {:same, [{[2, 2, 2], [1, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 1, 0])
-    assert {:both, [{[2, 2, 2, 2], [1, 0, 0, 0]}, {[3, 2, 2], [2, 0, 0]}]} == Counter.get_next([2, 2, 2], [1, 1, 1])
+
+    assert {:both, [{[2, 2, 2, 2], [1, 0, 0, 0]}, {[3, 2, 2], [2, 0, 0]}]} ==
+             Counter.get_next([2, 2, 2], [1, 1, 1])
 
     # over result
     assert {:same, [{[3, 2], [2, 1]}]} == Counter.get_next([3, 2], [2, 0])
@@ -31,7 +33,17 @@ defmodule CounterTest do
     assert {:same, [{[3, 3], [2, 1]}]} == Counter.get_next([3, 3], [1, 2])
     assert {:same, [{[3, 3], [2, 2]}]} == Counter.get_next([3, 3], [2, 1])
     assert {:over, [{[4, 3], [3, 0]}]} == Counter.get_next([3, 3], [2, 2])
-
   end
 
+  test "it memoizes and calculates shells" do
+    Counter.start()
+    assert {:same, [{[2, 2], [0, 1], 1}]} = Counter.increment([2, 2], [0, 0])
+    assert {:same, [{[2, 2], [1, 0], 1}]} = Counter.increment([2, 2], [0, 1])
+    assert {:same, [{[2, 2], [1, 1], 2}]} = Counter.increment([2, 2], [1, 0])
+
+    assert {:both, [{[2, 2, 2], [1, 0, 0], 1}, {[3, 2], [2, 0], 2}]} =
+             Counter.increment([2, 2], [1, 1])
+
+    Counter.stop()
+  end
 end
