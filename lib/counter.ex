@@ -61,7 +61,7 @@ defmodule Counter do
             |> List.first()
 
           result_to_add = {new_shape, desired}
-          shapes_and_positions = shapes_and_positions ++ [result_to_add]
+            shapes_and_positions = [result_to_add | shapes_and_positions]
           {:both, shapes_and_positions}
         else
           {:over, shapes_and_positions}

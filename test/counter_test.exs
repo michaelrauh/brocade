@@ -7,7 +7,7 @@ defmodule CounterTest do
     assert {:same, [{[2, 2], [0, 1]}]} == (Counter.get_next([2, 2], [0, 0]))
     assert {:same, [{[2, 2], [1, 0]}]} == (Counter.get_next([2, 2], [0, 1]))
     assert {:same, [{[2, 2], [1, 1]}]} == (Counter.get_next([2, 2], [1, 0]))
-    assert {:both, [{[3, 2], [2, 0]}, {[2, 2, 2], [1, 0, 0]}]} == (Counter.get_next([2, 2], [1, 1]))
+    assert {:both, [{[2, 2, 2], [1, 0, 0]}, {[3, 2], [2, 0]}]} == (Counter.get_next([2, 2], [1, 1]))
   end
 
 end
