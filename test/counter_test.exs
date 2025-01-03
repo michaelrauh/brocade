@@ -8,6 +8,30 @@ defmodule CounterTest do
     assert {:same, [{[2, 2], [1, 0]}]} == (Counter.get_next([2, 2], [0, 1]))
     assert {:same, [{[2, 2], [1, 1]}]} == (Counter.get_next([2, 2], [1, 0]))
     assert {:both, [{[2, 2, 2], [1, 0, 0]}, {[3, 2], [2, 0]}]} == (Counter.get_next([2, 2], [1, 1]))
+
+    # up result
+    assert {:same, [{[2, 2, 2], [0, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 0, 0])
+    assert {:same, [{[2, 2, 2], [1, 0, 1]}]} == Counter.get_next([2, 2, 2], [0, 1, 1])
+    assert {:same, [{[2, 2, 2], [1, 1, 0]}]} == Counter.get_next([2, 2, 2], [1, 0, 1])
+    assert {:same, [{[2, 2, 2], [1, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 1, 0])
+    assert {:both, [{[2, 2, 2, 2], [1, 0, 0, 0]}, {[3, 2, 2], [2, 0, 0]}]} == Counter.get_next([2, 2, 2], [1, 1, 1])
+
+    # over result
+    assert {:same, [{[3, 2], [2, 1]}]} == Counter.get_next([3, 2], [2, 0])
+    assert {:over, [{[4, 2], [3, 0]}, {[3, 3], [0, 2]}]} == Counter.get_next([3, 2], [2, 1])
+
+    # over tall
+    assert {:same, [{[4, 2], [3, 1]}]} == Counter.get_next([4, 2], [3, 0])
+    assert {:over, [{[5, 2], [4, 0]}, {[4, 3], [0, 2]}]} == Counter.get_next([4, 2], [3, 1])
+
+    # over squat
+    assert {:same, [{[3, 3], [1, 1]}]} == Counter.get_next([3, 3], [0, 2])
+    assert {:same, [{[3, 3], [2, 0]}]} == Counter.get_next([3, 3], [1, 1])
+    assert {:same, [{[3, 3], [1, 2]}]} == Counter.get_next([3, 3], [2, 0])
+    assert {:same, [{[3, 3], [2, 1]}]} == Counter.get_next([3, 3], [1, 2])
+    assert {:same, [{[3, 3], [2, 2]}]} == Counter.get_next([3, 3], [2, 1])
+    assert {:over, [{[4, 3], [3, 0]}]} == Counter.get_next([3, 3], [2, 2])
+
   end
 
 end
