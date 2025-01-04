@@ -33,7 +33,7 @@ defmodule OrthoTest do
     [ortho] = Ortho.add(ortho, "a")
     [ortho] = Ortho.add(ortho, "b")
     [ortho] = Ortho.add(ortho, "c")
-    [ortho| _others] = Ortho.add(ortho, "d")
+    [ortho | _others] = Ortho.add(ortho, "d")
     _ortho = Ortho.add(ortho, "e")
     Counter.stop()
   end
