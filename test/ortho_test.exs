@@ -15,8 +15,8 @@ defmodule OrthoTest do
   test "an ortho may have forbidden diagonals and required pair prefixes" do
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
-    ortho = Ortho.add(ortho, "b")
+    [ortho] = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "b")
 
     {forbidden, required} = Ortho.get_requirements(ortho)
     assert forbidden == MapSet.new(["b"])
@@ -30,10 +30,10 @@ defmodule OrthoTest do
 
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
-    ortho = Ortho.add(ortho, "b")
-    ortho = Ortho.add(ortho, "c")
-    ortho = Ortho.add(ortho, "d")
+    [ortho] = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "b")
+    [ortho] = Ortho.add(ortho, "c")
+    [ortho| _others] = Ortho.add(ortho, "d")
     _ortho = Ortho.add(ortho, "e")
     Counter.stop()
   end
@@ -42,20 +42,20 @@ defmodule OrthoTest do
     Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    ortho1 = Ortho.add(ortho1, "a")
-    ortho2 = Ortho.add(ortho2, "a")
+    [ortho1] = Ortho.add(ortho1, "a")
+    [ortho2] = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "b")
-    ortho2 = Ortho.add(ortho2, "c")
+    [ortho1] = Ortho.add(ortho1, "b")
+    [ortho2] = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "c")
-    ortho2 = Ortho.add(ortho2, "b")
+    [ortho1] = Ortho.add(ortho1, "c")
+    [ortho2] = Ortho.add(ortho2, "b")
     assert ortho1.id == ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "d")
-    ortho2 = Ortho.add(ortho2, "d")
+    [ortho1 | _] = Ortho.add(ortho1, "d")
+    [ortho2 | _] = Ortho.add(ortho2, "d")
     assert ortho1.id == ortho2.id
     Counter.stop()
   end

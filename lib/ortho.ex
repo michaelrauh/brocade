@@ -1,6 +1,8 @@
 defmodule Ortho do
   defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
+  # todo : convert pairs to lists rather than tuples
+  # todo : start checking against other length contexts and store in CK
   alias Counter
 
   def new() do
@@ -26,19 +28,62 @@ defmodule Ortho do
   end
 
   def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
-    {new_shape, next_position, shell} = Counter.increment(shape, position)
-    grid = if shape == new_shape, do: grid, else: pad_grid(grid)
-    new_grid = Map.put(grid, position, item)
-    new_id = calculate_id(new_grid)
+    case Counter.increment(shape, position) do
+      {:same, [{new_shape, next_position, shell}]} ->
+        new_grid = Map.put(grid, position, item)
+        new_id = calculate_id(new_grid)
 
-    %Ortho{
-      ortho
-      | grid: new_grid,
-        position: next_position,
-        shape: new_shape,
-        shell: shell,
-        id: new_id
-    }
+        [%Ortho{
+          ortho
+          | grid: new_grid,
+            position: next_position,
+            shape: new_shape,
+            shell: shell,
+            id: new_id
+        }]
+
+      {:both, [{up_shape, up_position, up_shell} | over_shapes_positions_shells]} ->
+        up_grid = pad_grid(grid)
+        new_up_grid = Map.put(up_grid, position, item)
+        new_up_id = calculate_id(new_up_grid)
+
+        [%Ortho{
+          ortho
+          | grid: new_up_grid,
+            position: up_position,
+            shape: up_shape,
+            shell: up_shell,
+            id: new_up_id
+        } | Enum.map(over_shapes_positions_shells, fn {shape, position, shell} ->
+          new_grid = Map.put(grid, position, item)
+          new_id = calculate_id(new_grid)
+
+          %Ortho{
+            ortho
+            | grid: new_grid,
+              position: position,
+              shape: shape,
+              shell: shell,
+              id: new_id
+          }
+        end)]
+
+      {:over, over_shapes_positions_shells} ->
+       Enum.map(over_shapes_positions_shells, fn {shape, position, shell} ->
+          new_grid = Map.put(grid, position, item)
+          new_id = calculate_id(new_grid)
+
+          %Ortho{
+            ortho
+            | grid: new_grid,
+              position: position,
+              shape: shape,
+              shell: shell,
+              id: new_id
+          }
+        end)
+    end
+
   end
 
   defp find_all_pair_prefixes(grid, next_position) do
