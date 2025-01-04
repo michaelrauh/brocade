@@ -43,11 +43,6 @@ defmodule ContextKeeper do
     GenServer.call(__MODULE__, :get_vocabulary)
   end
 
-  # todo make this not just pairs but context of any length.
-  # In ortho this can be accomplished by reading back to the edge and not differentiating by length
-  # in counter this means returning multiple results including the up but adding also a bump to each dimension
-  # caveat - the bump to each dimension can be skipped for rotational symmetry. That is,
-  # if two dimensions are the same magnitude, only bump one of them.
   def get_pairs() do
     GenServer.call(__MODULE__, :get_pairs)
   end

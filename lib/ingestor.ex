@@ -20,7 +20,7 @@ defmodule Ingestor do
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
 
-    # todo wait for new version to be picked up by all workers before getting remediations
+    # wait for new version to be picked up by all workers before getting remediations
     ortho_id_pair_list = ContextKeeper.get_relevant_remediations(new_pairs)
     remediation_ortho_ids = Enum.map(ortho_id_pair_list, fn {ortho_id, _pair} -> ortho_id end)
     remediation_orthos = ContextKeeper.get_orthos_by_id(remediation_ortho_ids)

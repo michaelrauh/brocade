@@ -19,7 +19,7 @@ defmodule WorkerServer do
     GenServer.call(__MODULE__, :get_vocabulary)
   end
 
-  # todo make this run on startup and integrate a way to subscribe and request response in one go for testing
+  # make this run on startup and integrate a way to subscribe and request response in one go for testing
   def process do
     GenServer.cast(__MODULE__, :process)
   end

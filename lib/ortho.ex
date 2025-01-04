@@ -2,6 +2,7 @@ defmodule Ortho do
   defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
   # todo : convert pairs to lists rather than tuples
+  # todo : make requirements and remediations not all length one
   # todo : start checking against other length contexts and store in CK
   alias Counter
 
