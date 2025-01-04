@@ -50,16 +50,16 @@ defmodule ContextKeeperTest do
     Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    ortho1 = Ortho.add(ortho1, "a")
-    ortho2 = Ortho.add(ortho2, "a")
+    [ortho1] = Ortho.add(ortho1, "a")
+    [ortho2] = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "b")
-    ortho2 = Ortho.add(ortho2, "c")
+    [ortho1] = Ortho.add(ortho1, "b")
+    [ortho2] = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "c")
-    ortho2 = Ortho.add(ortho2, "b")
+    [ortho1] = Ortho.add(ortho1, "c")
+    [ortho2] = Ortho.add(ortho2, "b")
     assert ortho1.id == ortho2.id
 
     ContextKeeper.add_orthos([ortho1, ortho2])
@@ -74,12 +74,12 @@ defmodule ContextKeeperTest do
     Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    ortho1 = Ortho.add(ortho1, "a")
-    ortho2 = Ortho.add(ortho2, "a")
+    [ortho1] = Ortho.add(ortho1, "a")
+    [ortho2] = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "b")
-    ortho2 = Ortho.add(ortho2, "c")
+    [ortho1] = Ortho.add(ortho1, "b")
+    [ortho2] = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
     ContextKeeper.add_orthos([ortho1])
@@ -94,12 +94,12 @@ defmodule ContextKeeperTest do
     Counter.start()
     ortho1 = Ortho.new()
     ortho2 = Ortho.new()
-    ortho1 = Ortho.add(ortho1, "a")
-    ortho2 = Ortho.add(ortho2, "a")
+    [ortho1] = Ortho.add(ortho1, "a")
+    [ortho2] = Ortho.add(ortho2, "a")
     assert ortho1.id == ortho2.id
 
-    ortho1 = Ortho.add(ortho1, "b")
-    ortho2 = Ortho.add(ortho2, "c")
+    [ortho1] = Ortho.add(ortho1, "b")
+    [ortho2] = Ortho.add(ortho2, "c")
     assert ortho1.id != ortho2.id
 
     ContextKeeper.add_orthos([ortho1])
@@ -113,9 +113,9 @@ defmodule ContextKeeperTest do
   test "it accepts remediations with duplicates by pair" do
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "a")
 
-    ortho2 = Ortho.add(ortho, "b")
+    [ortho2] = Ortho.add(ortho, "b")
 
     ContextKeeper.add_remediations([
       {ortho, {"a", "b"}},
@@ -132,11 +132,11 @@ defmodule ContextKeeperTest do
   test "it can get remediations matching keys including duplicates" do
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "a")
 
-    ortho2 = Ortho.add(ortho, "b")
+    [ortho2] = Ortho.add(ortho, "b")
 
-    ortho3 = Ortho.add(ortho, "c")
+    [ortho3] = Ortho.add(ortho, "c")
 
     ContextKeeper.add_remediations([
       {ortho, {"a", "b"}},
@@ -166,7 +166,7 @@ defmodule ContextKeeperTest do
   test "it can remove remediations" do
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "a")
 
     ContextKeeper.add_remediations([{ortho, {"a", "b"}}])
 

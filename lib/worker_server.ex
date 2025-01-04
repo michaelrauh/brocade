@@ -104,7 +104,7 @@ defmodule WorkerServer do
           end)
 
         new_orthos =
-          Enum.map(candidates, fn word ->
+          Enum.flat_map(candidates, fn word ->
             Ortho.add(top, word)
           end)
 

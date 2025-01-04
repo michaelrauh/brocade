@@ -39,8 +39,8 @@ defmodule WorkerServerTest do
   test "searches for results and writes new ones back to context and the workserver" do
     Counter.start()
     ortho = Ortho.new()
-    ortho = Ortho.add(ortho, "a")
-    ortho = Ortho.add(ortho, "b")
+    [ortho] = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "b")
 
     WorkServer.push(Ortho.new())
     ContextKeeper.add_pairs([{"a", "b"}])
