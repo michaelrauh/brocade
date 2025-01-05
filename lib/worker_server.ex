@@ -82,6 +82,9 @@ defmodule WorkerServer do
     end
   end
 
+  # this can be faster - offhand, it would be faster to pull prefixes out of a DB and check a set for what
+  # comes after rather than checking each thing. There may be more compact ways to store remediations as well
+  # given that remediations generated in a single loop will all have the same prefixes
   defp process_work(state) do
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
