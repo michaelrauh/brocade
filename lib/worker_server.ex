@@ -87,6 +87,7 @@ defmodule WorkerServer do
   # given that remediations generated in a single loop will all have the same prefixes
   # also appending to lists is slow
   defp process_work(state) do
+    # right now if the server dies popped messages will be lost
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
 
