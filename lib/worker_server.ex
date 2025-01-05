@@ -85,6 +85,7 @@ defmodule WorkerServer do
   # this can be faster - offhand, it would be faster to pull prefixes out of a DB and check a set for what
   # comes after rather than checking each thing. There may be more compact ways to store remediations as well
   # given that remediations generated in a single loop will all have the same prefixes
+  # also appending to lists is slow
   defp process_work(state) do
     status_top_and_version = WorkServer.pop()
     state = update_state_from_version(status_top_and_version, state)
@@ -97,10 +98,10 @@ defmodule WorkerServer do
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
             missing_required =
-              Enum.find(required, &(!MapSet.member?(state.pairs, [&1, word])))
+              Enum.find(required, &(!MapSet.member?(state.pairs, &1 ++ [word])))
 
             if missing_required do
-              {cands, [{top, [missing_required, word]} | rems]}
+              {cands, [{top, missing_required ++ [word]} | rems]}
             else
               {[word | cands], rems}
             end

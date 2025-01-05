@@ -20,7 +20,7 @@ defmodule OrthoTest do
 
     {forbidden, required} = Ortho.get_requirements(ortho)
     assert forbidden == MapSet.new(["b"])
-    assert required == ["a"]
+    assert required == [["a"]]
     Counter.stop()
   end
 

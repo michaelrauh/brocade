@@ -1,9 +1,8 @@
 defmodule Ortho do
   defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
-  # todo make requirements and remediations not bare
   # todo : make requirements and remediations not all length one
-  # todo : start checking against other length contexts and store in CK
+  # todo : add in splines as context
   alias Counter
 
   def new() do
@@ -94,6 +93,7 @@ defmodule Ortho do
   defp find_all_pair_prefixes(grid, next_position) do
     previous_positions(next_position)
     |> Enum.map(&Map.get(grid, &1))
+    |> Enum.map(&[&1])
   end
 
   defp get_others_in_same_shell(grid, shell) do
