@@ -14,10 +14,12 @@ defmodule Ingestor do
   end
 
   def handle_call({:ingest, input}, _from, state) do
-    # todo spline add goes here
+    splines = Splitter.splines(input)
+
+    # the below map is redundant
     pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> [f, s] end)
     vocabulary = Splitter.vocabulary(input)
-    new_pairs = ContextKeeper.add_pairs(pairs)
+    new_pairs = ContextKeeper.add_pairs(pairs ++ splines)
     ContextKeeper.add_vocabulary(vocabulary)
     WorkServer.new_version()
 

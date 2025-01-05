@@ -99,7 +99,6 @@ defmodule WorkerServer do
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
             missing_required =
               Enum.find(required, &(!MapSet.member?(state.pairs, &1 ++ [word])))
-
             if missing_required do
               {cands, [{top, missing_required ++ [word]} | rems]}
             else
@@ -114,9 +113,9 @@ defmodule WorkerServer do
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
 
-        # if new_orthos != [] do
-        #   IO.inspect(hd(new_orthos))
-        # end
+        if new_orthos != [] do
+          IO.inspect(hd(new_orthos))
+        end
 
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)

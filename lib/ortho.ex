@@ -1,19 +1,10 @@
 defmodule Ortho do
   defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
-  # todo : make requirements and remediations not all length one
-  # todo : add in splines as context
   alias Counter
 
   def new() do
     %Ortho{grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil}
-  end
-
-  def previous_positions(position) do
-    position
-    |> Enum.with_index()
-    |> Stream.filter(fn {val, _idx} -> val > 0 end)
-    |> Enum.map(fn {val, idx} -> List.replace_at(position, idx, val - 1) end)
   end
 
   def pad_grid(grid) do
@@ -91,9 +82,23 @@ defmodule Ortho do
   end
 
   defp find_all_pair_prefixes(grid, next_position) do
-    previous_positions(next_position)
-    |> Enum.map(&Map.get(grid, &1))
-    |> Enum.map(&[&1])
+    all_positions_to_edge(next_position)
+    |> Enum.map(fn dimension_positions ->
+      dimension_positions
+      |> Enum.map(&Map.get(grid, &1))
+      |> Enum.filter(& &1)
+    end)
+    |> Enum.reject(&(&1 == []))
+  end
+
+  defp all_positions_to_edge(position) do
+    position
+    |> Enum.with_index()
+    |> Enum.map(fn {val, idx} ->
+      for i <- 0..(val - 1) do
+        List.replace_at(position, idx, i)
+      end
+    end)
   end
 
   defp get_others_in_same_shell(grid, shell) do
