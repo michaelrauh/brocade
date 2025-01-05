@@ -26,13 +26,13 @@ defmodule WorkerServerTest do
   end
 
   test "it checks for version and pulls new context if version is out of date" do
-    ContextKeeper.add_pairs([{"a", "b"}])
+    ContextKeeper.add_pairs([["a", "b"]])
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
     {:ok, pairs} = WorkerServer.get_pairs()
     {:ok, vocabulary} = WorkerServer.get_vocabulary()
-    assert pairs == MapSet.new([{"a", "b"}])
+    assert pairs == MapSet.new([["a", "b"]])
     assert vocabulary == ["b", "a"]
   end
 
@@ -43,7 +43,7 @@ defmodule WorkerServerTest do
     [ortho] = Ortho.add(ortho, "b")
 
     WorkServer.push(Ortho.new())
-    ContextKeeper.add_pairs([{"a", "b"}])
+    ContextKeeper.add_pairs([["a", "b"]])
     ContextKeeper.add_vocabulary(["a", "b"])
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
@@ -58,7 +58,7 @@ defmodule WorkerServerTest do
     :ok = WorkerServer.process()
     assert_receive :worker_server_done
     remediations = ContextKeeper.get_remediations()
-    assert Enum.any?(remediations, fn {_ortho, pair} -> pair == {"a", "b"} end)
+    assert Enum.any?(remediations, fn {_ortho, pair} -> pair == ["a", "b"] end)
     Counter.stop()
   end
 end

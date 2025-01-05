@@ -14,7 +14,8 @@ defmodule Ingestor do
   end
 
   def handle_call({:ingest, input}, _from, state) do
-    pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> {f, s} end)
+    # todo spline add goes here
+    pairs = Splitter.lines(input) |> Enum.map(fn [f, s] -> [f, s] end)
     vocabulary = Splitter.vocabulary(input)
     new_pairs = ContextKeeper.add_pairs(pairs)
     ContextKeeper.add_vocabulary(vocabulary)

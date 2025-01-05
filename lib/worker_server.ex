@@ -94,10 +94,10 @@ defmodule WorkerServer do
         {candidates, remediations} =
           Enum.reduce(working_vocabulary, {[], []}, fn word, {cands, rems} ->
             missing_required =
-              Enum.find(required, &(!MapSet.member?(state.pairs, {&1, word})))
+              Enum.find(required, &(!MapSet.member?(state.pairs, [&1, word])))
 
             if missing_required do
-              {cands, [{top, {missing_required, word}} | rems]}
+              {cands, [{top, [missing_required, word]} | rems]}
             else
               {[word | cands], rems}
             end

@@ -109,8 +109,8 @@ defmodule ContextKeeper do
   end
 
   def handle_call({:add_remediations, pairs}, _from, state) do
-    Enum.each(pairs, fn {ortho, {f, s}} ->
-      :ets.insert(@remediation_table_name, {{f, s}, ortho.id})
+    Enum.each(pairs, fn {ortho, pair} ->
+      :ets.insert(@remediation_table_name, {pair, ortho.id})
     end)
 
     {:reply, :ok, state}
