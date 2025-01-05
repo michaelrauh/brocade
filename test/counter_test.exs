@@ -10,7 +10,7 @@ defmodule CounterTest do
     assert {:both, [{[2, 2, 2], [1, 0, 0]}, {[3, 2], [2, 0]}]} == Counter.get_next([2, 2], [1, 1])
 
     # up result
-    assert {:same, [{[2, 2, 2], [0, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 0, 0])
+    assert {:same, [{[2, 2, 2], [0, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 0, 0]) # is this right?
     assert {:same, [{[2, 2, 2], [1, 0, 1]}]} == Counter.get_next([2, 2, 2], [0, 1, 1])
     assert {:same, [{[2, 2, 2], [1, 1, 0]}]} == Counter.get_next([2, 2, 2], [1, 0, 1])
     assert {:same, [{[2, 2, 2], [1, 1, 1]}]} == Counter.get_next([2, 2, 2], [1, 1, 0])
@@ -28,7 +28,7 @@ defmodule CounterTest do
 
     # over squat
     assert {:same, [{[3, 3], [1, 1]}]} == Counter.get_next([3, 3], [0, 2])
-    assert {:same, [{[3, 3], [2, 0]}]} == Counter.get_next([3, 3], [1, 1])
+    assert {:same, [{[3, 3], [2, 0]}]} == Counter.get_next([3, 3], [1, 1]) # todo fix I think this is wrong. [1,1] should have been covered by now
     assert {:same, [{[3, 3], [1, 2]}]} == Counter.get_next([3, 3], [2, 0])
     assert {:same, [{[3, 3], [2, 1]}]} == Counter.get_next([3, 3], [1, 2])
     assert {:same, [{[3, 3], [2, 2]}]} == Counter.get_next([3, 3], [2, 1])

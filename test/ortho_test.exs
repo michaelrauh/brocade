@@ -59,4 +59,24 @@ defmodule OrthoTest do
     assert ortho1.id == ortho2.id
     Counter.stop()
   end
+
+  test "orthos can be built over" do
+    Counter.start()
+    ortho = Ortho.new()
+    [ortho] = Ortho.add(ortho, "a")
+    [ortho] = Ortho.add(ortho, "b")
+    [ortho] = Ortho.add(ortho, "c")
+    [_ortho, ortho] = Ortho.add(ortho, "d")
+    [ortho] = Ortho.add(ortho, "e")
+    assert ortho.shape == [3,2]
+    [_ortho, ortho] = Ortho.add(ortho, "f")
+    [ortho] = Ortho.add(ortho, "g")
+    IO.inspect(Ortho.get_requirements(ortho))
+    assert ortho.shape == [3,3]
+    IO.inspect(ortho)
+    Counter.stop()
+  end
+  # a b g
+  # c d
+  # e f
 end

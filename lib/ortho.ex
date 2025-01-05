@@ -49,15 +49,15 @@ defmodule Ortho do
               shell: up_shell,
               id: new_up_id
           }
-          | Enum.map(over_shapes_positions_shells, fn {shape, position, shell} ->
+          | Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
               new_grid = Map.put(grid, position, item)
               new_id = calculate_id(new_grid)
 
               %Ortho{
                 ortho
                 | grid: new_grid,
-                  position: position,
-                  shape: shape,
+                  position: next_position,
+                  shape: new_shape,
                   shell: shell,
                   id: new_id
               }
@@ -65,15 +65,16 @@ defmodule Ortho do
         ]
 
       {:over, over_shapes_positions_shells} ->
-        Enum.map(over_shapes_positions_shells, fn {shape, position, shell} ->
+        # IO.inspect("over")
+        Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
           new_grid = Map.put(grid, position, item)
           new_id = calculate_id(new_grid)
 
           %Ortho{
             ortho
             | grid: new_grid,
-              position: position,
-              shape: shape,
+              position: next_position,
+              shape: new_shape,
               shell: shell,
               id: new_id
           }
