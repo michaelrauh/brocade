@@ -37,7 +37,7 @@ defmodule Ortho do
 
       {:both, [{up_shape, up_position, up_shell} | over_shapes_positions_shells]} ->
         up_grid = pad_grid(grid)
-        new_up_grid = Map.put(up_grid, position, item)
+        new_up_grid = Map.put(up_grid, [0|position], item)
         new_up_id = calculate_id(new_up_grid)
 
         [
