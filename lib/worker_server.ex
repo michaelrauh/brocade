@@ -115,13 +115,13 @@ defmodule WorkerServer do
             Ortho.add(top, word)
           end)
 
+          Enum.each(new_orthos, fn ortho ->
+            unless Enum.all?(ortho.shape, &(&1 == 2)) do
+              IO.inspect(ortho, label: "Ortho with non-2 shape")
+            end
+          end)
         new_orthos = ContextKeeper.add_orthos(new_orthos)
 
-        # Enum.each(new_orthos, fn ortho ->
-        #   unless Enum.all?(ortho.shape, &(&1 == 2)) do
-        #     IO.inspect(ortho, label: "Ortho with non-2 shape")
-        #   end
-        # end)
 
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
