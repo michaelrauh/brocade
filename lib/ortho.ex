@@ -63,6 +63,7 @@ defmodule Ortho do
               }
             end)
         ]
+        # |> IO.inspect()
 
       {:over, over_shapes_positions_shells} ->
         # IO.inspect("over")

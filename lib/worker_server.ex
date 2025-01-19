@@ -82,6 +82,9 @@ defmodule WorkerServer do
     end
   end
 
+  # a note on eventual consistency: It's ok if this asks if an ortho has been found and gets a false negative. It will just be replayed.
+  # The only place where consistency must be strong is on ingestion. These can even be handled in batches if desired.
+
   # this can be faster - offhand, it would be faster to pull prefixes out of a DB and check a set for what
   # comes after rather than checking each thing. There may be more compact ways to store remediations as well
   # given that remediations generated in a single loop will all have the same prefixes
@@ -114,9 +117,11 @@ defmodule WorkerServer do
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
 
-        # if new_orthos != [] do
-        #   IO.inspect(hd(new_orthos))
-        # end
+        # Enum.each(new_orthos, fn ortho ->
+        #   unless Enum.all?(ortho.shape, &(&1 == 2)) do
+        #     IO.inspect(ortho, label: "Ortho with non-2 shape")
+        #   end
+        # end)
 
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
