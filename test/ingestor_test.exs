@@ -34,7 +34,7 @@ defmodule IngestorTest do
     WorkerServer.process()
     assert_receive :worker_server_done
     # it should have a non-square shape reflecting the input
-    IO.inspect(ContextKeeper.get_orthos())
+    # IO.inspect(ContextKeeper.get_orthos())
     Counter.stop()
   end
 end

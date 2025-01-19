@@ -71,9 +71,9 @@ defmodule OrthoTest do
     assert ortho.shape == [3,2]
     [_ortho, ortho] = Ortho.add(ortho, "f")
     [ortho] = Ortho.add(ortho, "g")
-    IO.inspect(Ortho.get_requirements(ortho))
+    # IO.inspect(Ortho.get_requirements(ortho))
     assert ortho.shape == [3,3]
-    IO.inspect(ortho)
+    # IO.inspect(ortho)
     Counter.stop()
   end
   # a b g
