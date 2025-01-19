@@ -39,15 +39,6 @@ defmodule Counter do
     valid_possibilities = possibilities |> Enum.reject(&Enum.member?(visited, &1))
     current_index = Enum.find_index(valid_possibilities, &(&1 == current_position))
 
-    IO.inspect("**********")
-    IO.inspect({"shape", shape})
-    IO.inspect({"current_position", current_position})
-    IO.inspect({"current_index", current_index})
-    IO.inspect({"possibilities", possibilities})
-    IO.inspect({"visited", visited})
-    IO.inspect({"valid_possibilities", valid_possibilities})
-    IO.inspect({"position", Enum.at(valid_possibilities, current_index + 1)})
-
     case Enum.at(valid_possibilities, current_index + 1) do
       nil ->
         over_list = over_shapes(shape, possibilities)
@@ -55,7 +46,8 @@ defmodule Counter do
         if Enum.all?(shape, &(&1 == 2)) do
           up = up_shape(shape, possibilities)
           res = [up | over_list]
-          Enum.each(res, fn {shape, pos} -> insert_visited(shape, pos, [[0|current_position] | Enum.map(visited, fn x -> [0|x] end)]) end) # only pad up, not both
+          Enum.each([up], fn {shape, pos} -> insert_visited(shape, pos, [[0|current_position] | Enum.map(visited, fn x -> [0|x] end)]) end)
+          Enum.each(over_list, fn {shape, pos} -> insert_visited(shape, pos, [current_position | visited]) end)
           {:both, res}
         else
           res = over_list
