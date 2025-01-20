@@ -22,7 +22,7 @@ defmodule Ortho do
     case Counter.increment(shape, position) do
       {:same, [{new_shape, next_position, shell}]} ->
         new_grid = Map.put(grid, position, item)
-        new_id = calculate_id(new_grid)
+        new_id = calculate_id(new_grid, new_shape)
 
         [
           %Ortho{
@@ -38,7 +38,7 @@ defmodule Ortho do
       {:both, [{up_shape, up_position, up_shell} | over_shapes_positions_shells]} ->
         up_grid = pad_grid(grid)
         new_up_grid = Map.put(up_grid, [0|position], item)
-        new_up_id = calculate_id(new_up_grid)
+        new_up_id = calculate_id(new_up_grid, up_shape)
 
         [
           %Ortho{
@@ -51,7 +51,7 @@ defmodule Ortho do
           }
           | Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
               new_grid = Map.put(grid, position, item)
-              new_id = calculate_id(new_grid)
+              new_id = calculate_id(new_grid, new_shape)
 
               %Ortho{
                 ortho
@@ -69,7 +69,7 @@ defmodule Ortho do
         # IO.inspect("over")
         Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
           new_grid = Map.put(grid, position, item)
-          new_id = calculate_id(new_grid)
+          new_id = calculate_id(new_grid, new_shape)
 
           %Ortho{
             ortho
@@ -110,7 +110,9 @@ defmodule Ortho do
     end)
   end
 
-  defp calculate_id(grid) do
+  defp calculate_id(grid, shape) do
+    sorted_shape = Enum.sort(shape)
+
     one_hot_positions =
       grid
       |> Enum.filter(fn {coords, _} -> Enum.sum(coords) == 1 end)
@@ -128,7 +130,7 @@ defmodule Ortho do
       end)
       |> Enum.map(fn {_, val} -> val end)
 
-    sorted_positions
+    {sorted_shape, sorted_positions}
     |> :erlang.term_to_binary()
     |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
