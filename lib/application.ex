@@ -14,6 +14,7 @@ defmodule Brocade.Application do
     {:ok, pid} = Supervisor.start_link(children, opts)
     Ingestor.ingest(File.read!("example.txt"))
     WorkerServer.process()
+    :observer.start()
     # :timer.sleep(1000)
     # Ingestor.ingest(File.read!("example2.txt"))
     # :timer.sleep(2000)

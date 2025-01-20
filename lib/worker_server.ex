@@ -117,7 +117,6 @@ defmodule WorkerServer do
 
         new_orthos = ContextKeeper.add_orthos(new_orthos)
 
-
         ContextKeeper.add_remediations(remediations)
         WorkServer.push(new_orthos)
         process_work(state)
