@@ -1,93 +1,138 @@
 defmodule Ortho do
-  defstruct grid: %{}, counter: nil, id: nil
+  defstruct grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil
 
   alias Counter
 
-  def new do
-    %Ortho{counter: Counter.new()}
-  end
-
-  def previous_positions(position) do
-    position
-    |> Enum.with_index()
-    |> Enum.map(&List.replace_at(position, elem(&1, 1), elem(&1, 0) - 1))
-    |> Enum.filter(fn pos -> Enum.all?(pos, fn x -> x >= 0 end) end)
+  def new() do
+    %Ortho{grid: %{}, shape: [2, 2], position: [0, 0], shell: 0, id: nil}
   end
 
   def pad_grid(grid) do
-    Enum.reduce(grid, %{}, fn {key, value}, acc ->
-      Map.put(acc, [0 | key], value)
-    end)
+    Map.new(grid, fn {key, value} -> {[0 | key], value} end)
   end
 
-  def add(%Ortho{grid: grid, counter: counter} = ortho, item, context) do
-    {next_position, new_counter} = Counter.increment(counter)
-    shell = Enum.sum(next_position)
-    forbidden = Map.get(calculate_diagonals(grid), shell, MapSet.new())
+  def get_requirements(%Ortho{grid: grid, position: position, shell: shell}) do
+    forbidden = get_others_in_same_shell(grid, shell)
+    required = find_all_pair_prefixes(grid, position)
 
-    if MapSet.member?(forbidden, item) do
-      {:diag, {shell, item}}
-    else
-      grid = optionally_pad_grid(grid, next_position)
-      case search_for_missing_pair(grid, next_position, context, item) do
-        nil ->
-          new_grid = Map.put(grid, next_position, item)
-          {:ok, %Ortho{ortho | grid: new_grid, counter: new_counter, id: calculate_id(new_grid)}}
-        missing_pair ->
-          {:error, missing_pair}
-      end
-    end
+    {forbidden, required}
   end
 
-  defp search_for_missing_pair(grid, next_position, context, item) do
-    previous_positions(next_position)
-    |> Enum.map(&Map.get(grid, &1))
-    |> Enum.map(&Pair.new(&1, item))
-    |> Enum.find(&not MapSet.member?(context, &1))
-  end
+  def add(%Ortho{grid: grid, position: position, shape: shape} = ortho, item) do
+    case Counter.increment(shape, position) do
+      {:same, [{new_shape, next_position, shell}]} ->
+        new_grid = Map.put(grid, position, item)
+        new_id = calculate_id(new_grid, new_shape)
 
-  defp optionally_pad_grid(grid, next_position) do
-    if Enum.count(List.first(Map.keys(grid), [0, 0])) != Enum.count(next_position) do
-      pad_grid(grid)
-    else
-      grid
-    end
-  end
+        [
+          %Ortho{
+            ortho
+            | grid: new_grid,
+              position: next_position,
+              shape: new_shape,
+              shell: shell,
+              id: new_id
+          }
+        ]
 
-  defp calculate_diagonals(grid) do
-    Enum.reduce(Map.keys(grid), %{}, fn key, acc ->
-      distance = Enum.sum(key)
-      Map.update(acc, distance, MapSet.new([Map.get(grid, key)]), &MapSet.put(&1, Map.get(grid, key)))
-    end)
-  end
+      {:both, [{up_shape, up_position, up_shell} | over_shapes_positions_shells]} ->
+        up_grid = pad_grid(grid)
+        new_up_grid = Map.put(up_grid, [0|position], item)
+        new_up_id = calculate_id(new_up_grid, up_shape)
 
-  defp calculate_id(grid) do
-    dimension = Enum.count(List.first(Map.keys(grid)))
-    permutations = permutations(Enum.to_list(0..(dimension - 1)))
+        [
+          %Ortho{
+            ortho
+            | grid: new_up_grid,
+              position: up_position,
+              shape: up_shape,
+              shell: up_shell,
+              id: new_up_id
+          }
+          | Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
+              new_grid = Map.put(grid, position, item)
+              new_id = calculate_id(new_grid, new_shape)
 
-    canonical_forms =
-      for perm <- permutations do
-        grid
-        |> Enum.map(fn {pos, val} ->
-          new_pos =
-            Enum.with_index(pos)
-            |> Enum.sort_by(fn {_elem, index} -> Enum.find_index(perm, fn x -> x == index end) end)
-            |> Enum.map(&elem(&1, 0))
+              %Ortho{
+                ortho
+                | grid: new_grid,
+                  position: next_position,
+                  shape: new_shape,
+                  shell: shell,
+                  id: new_id
+              }
+            end)
+        ]
+        # |> IO.inspect()
 
-          {new_pos, val}
+      {:over, over_shapes_positions_shells} ->
+        # IO.inspect("over")
+        Enum.map(over_shapes_positions_shells, fn {new_shape, next_position, shell} ->
+          new_grid = Map.put(grid, position, item)
+          new_id = calculate_id(new_grid, new_shape)
+
+          %Ortho{
+            ortho
+            | grid: new_grid,
+              position: next_position,
+              shape: new_shape,
+              shell: shell,
+              id: new_id
+          }
         end)
-        |> Enum.sort()
-      end
-
-    canonical_form = Enum.min(canonical_forms)
-
-    :crypto.hash(:sha256, :erlang.term_to_binary(canonical_form))
-    |> Base.encode16()
+    end
   end
 
-  defp permutations([]), do: [[]]
+  defp find_all_pair_prefixes(grid, next_position) do
+    all_positions_to_edge(next_position)
+    |> Enum.map(fn dimension_positions ->
+      dimension_positions
+      |> Enum.map(&Map.get(grid, &1))
+      |> Enum.filter(& &1)
+    end)
+    |> Enum.reject(&(&1 == []))
+  end
 
-  defp permutations(list) do
-    for x <- list, y <- permutations(list -- [x]), do: [x | y]
+  defp all_positions_to_edge(position) do
+    position
+    |> Enum.with_index()
+    |> Enum.map(fn {val, idx} ->
+      for i <- 0..(val - 1) do
+        List.replace_at(position, idx, i)
+      end
+    end)
+  end
+
+  defp get_others_in_same_shell(grid, shell) do
+    grid
+    |> Enum.reduce(MapSet.new(), fn {pos, val}, acc ->
+      if Enum.sum(pos) == shell, do: MapSet.put(acc, val), else: acc
+    end)
+  end
+
+  defp calculate_id(grid, shape) do
+    sorted_shape = Enum.sort(shape)
+
+    one_hot_positions =
+      grid
+      |> Enum.filter(fn {coords, _} -> Enum.sum(coords) == 1 end)
+      |> Enum.sort_by(fn {_, val} -> val end)
+      |> Enum.map(fn {coords, _} -> coords end)
+
+    axis_order =
+      one_hot_positions
+      |> Enum.map(fn coords -> Enum.find_index(coords, &(&1 == 1)) end)
+
+    sorted_positions =
+      grid
+      |> Enum.sort_by(fn {coords, _} ->
+        Enum.map(axis_order, &Enum.at(coords, &1))
+      end)
+      |> Enum.map(fn {_, val} -> val end)
+
+    {sorted_shape, sorted_positions}
+    |> :erlang.term_to_binary()
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
   end
 end

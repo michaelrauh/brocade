@@ -1,4 +1,4 @@
-example.txt
+example*.txt
 # The directory Mix will write compiled artifacts to.
 /_build/
 
@@ -25,3 +25,4 @@ brocade-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+example.txt
