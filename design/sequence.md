@@ -14,7 +14,7 @@ sequenceDiagram
     Context-->>Context_DB: Write (context_hash, new_version)
     Context->>Work_Queue: Push (seed, new_version)
     Worker->>Work_Queue: Pop
-    Work_Queue->>Worker: Work, Version
+    Work_Queue->>Worker: Work, Version 
     Worker->>Worker: Check_version
     Worker->>Context: Get_Context
     Context->>Worker: (context, current_version)
