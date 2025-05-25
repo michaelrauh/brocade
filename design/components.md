@@ -1,8 +1,9 @@
 ```mermaid
 flowchart LR
-    User-->|Corpus|Context
-    Context-->Context_Queue
-    Context-->Context_DB
+    User-->Ingestor
+    Ingestor-->Context_Queue
+    Context_Queue-->Context
+    Context-->Context_DB 
     Context-->Work_Queue
     Work_Queue-->Worker
     Worker-->Context

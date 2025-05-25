@@ -1,14 +1,12 @@
 defmodule Queue do
   use GenServer
 
-  # Only needed for supervision tree
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
   def init(state), do: {:ok, state}
 
-  # Channel creation
   def create_channel(name: channel_name) do
     case Queue.Channel.start_link(name: channel_name) do
       {:ok, pid} -> {:ok, pid}
@@ -57,9 +55,15 @@ defmodule Queue do
     end
 
     def handle_call({:nack, id}, _from, %{pending: pending, queue: queue} = state) do
-      data = Map.get(pending, id)
-      new_queue = :queue.in(data, queue)
-      {:reply, :ok, %{state | pending: Map.delete(pending, id), queue: new_queue}}
+      case Map.get(pending, id) do
+        nil ->
+          # If the item is no longer in pending (already acked), just ignore the nack
+          {:reply, :ok, state}
+        data ->
+          # Item exists in pending, requeue it and remove from pending
+          new_queue = :queue.in(data, queue)
+          {:reply, :ok, %{state | pending: Map.delete(pending, id), queue: new_queue}}
+      end
     end
   end
 end
