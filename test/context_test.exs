@@ -58,4 +58,5 @@ defmodule ContextTest do
   end
 
   # TODO when it is done polling it posts a seed value
+  # TODO when asked for context it returns the bitmasks and version number
 end
