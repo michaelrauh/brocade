@@ -14,16 +14,16 @@ sequenceDiagram
     Context->>Work_Queue: Push (seed, new_version)
     Worker->>Work_Queue: Pop
     Work_Queue->>Worker: Work, Version 
-    Worker->>Worker: Check_version 
+    Worker->>Worker: Check_version  
     Worker->>Context: Get_Context
-    Context->>Worker: (context, current_version)
+    Context->>Worker: (context, current_version) 
     Worker->>Worker: Update_version
     Worker->>Worker: Calculate
     Worker->>DB_Queue: Push
     Feeder->>DB_Queue: pop
     Feeder->>Result_DB: Write
     Result_DB->>Feeder: New_Results
-    Feeder->>Worker_Queue: Push(New_Results) 
+    Feeder->>Work_Queue: Push(New_Results) 
     Follower->>Result_DB: List_Versions
     Follower->>Result_DB: Get_out_of_date
     Result_DB->>Follower: Old_Results 

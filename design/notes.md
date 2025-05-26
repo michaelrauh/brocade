@@ -22,3 +22,16 @@
     - consider smaller data representations 
     - consider splitting apart the counter from the ortho more thoroughly
     - consider exposing a proprty "jagged" and scheduling jagged orthos higher to avoid the "up" free move
+4. Worker
+    - worker would still return requirements and forbidden
+    - now requirements go in to context bitmaps and come out as plain bitmaps
+    - and all of the bit maps together
+    - find the positions of the 1s and decode those to words to get results
+    - for each zero, find which subphrase owns the bitmap for that zero and use that subphrase as the remediation
+5. Next 
+    - make a dbq 
+    - make a feeder - make sure it feeds back to work queue on new
+    - make a result db 
+    - implement the worker flow
+6. Later
+    - implement follower
