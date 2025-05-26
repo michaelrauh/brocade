@@ -4,6 +4,7 @@ defmodule ContextTest do
 
   setup do
     start_supervised!(ContextQueue)
+    start_supervised!(WorkQueue)
     start_supervised!(Context)
     :ok
   end
@@ -97,4 +98,5 @@ defmodule ContextTest do
 
   # TODO when it is done polling it posts a seed value
   # TODO when asked for context it returns the bitmasks and version number
+  # TODO add persistence
 end
