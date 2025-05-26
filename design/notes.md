@@ -30,6 +30,7 @@
     - for each zero, find which subphrase owns the bitmap for that zero and use that subphrase as the remediation
 5. Next 
     - make a feeder - make sure it feeds back to work queue on new
+    - go back and make everything sync/call. This will provide good pressure to split things apart and move to Rust
     - implement the worker flow
     - just call the poll method for now
     - implement e2e tests
