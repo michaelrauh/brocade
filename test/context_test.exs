@@ -6,6 +6,7 @@ defmodule ContextTest do
     start_supervised!(ContextQueue)
     start_supervised!(WorkQueue)
     start_supervised!(Context)
+    start_supervised!(ContextDB)
     :ok
   end
 
@@ -96,7 +97,45 @@ defmodule ContextTest do
     end)
   end
 
+  test "context and contextdb stay in sync after poll" do
+    # Push initial state into ContextDB
+    initial_vocab = %{"alpha" => 0}
+    initial_bitmasks = %{["alpha"] => 0}
+    ContextDB.set_all({initial_vocab, initial_bitmasks})
+
+    # Push new vocab and subphrase into the queue
+    :ok = ContextQueue.push({:vocab, "beta"})
+    :ok = ContextQueue.push({:subphrase, ["alpha", "beta"]})
+    Context.poll()
+
+    eventually(fn ->
+      # Check Context state
+      bitmasks = Context.bitmasks()
+      # Check ContextDB state
+      {vocab_db, bitmasks_db} = ContextDB.get_all()
+
+      # "beta" should be in vocab with position 1
+      cond do
+        Map.get(vocab_db, "beta") != 1 -> {:error, "beta not in vocab_db"}
+        Map.get(bitmasks, ["alpha"]) != 2 -> {:error, "bitmask not updated in Context"}
+        Map.get(bitmasks_db, ["alpha"]) != 2 -> {:error, "bitmask not updated in ContextDB"}
+        true -> :ok
+      end
+    end)
+  end
+
+  test "get_context returns vocab, bitmasks, and correct version" do
+    # Set up initial state
+    vocab = %{"foo" => 0, "bar" => 1}
+    bitmasks = %{["foo"] => 1, ["bar"] => 2, ["foo", "bar"] => 3}
+    ContextDB.set_all({vocab, bitmasks})
+
+    {got_vocab, got_bitmasks, version} = Context.get_context()
+
+    assert got_vocab == vocab
+    assert got_bitmasks == bitmasks
+    assert version == map_size(vocab) + map_size(bitmasks)
+  end
+
   # TODO when it is done polling it posts a seed value
-  # TODO when asked for context it returns the bitmasks and version number
-  # TODO add persistence
 end

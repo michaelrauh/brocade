@@ -7,7 +7,7 @@ defmodule Context do
   end
 
   def init(_) do
-    {:ok, {%{}, %{}}}
+    {:ok, :ok}
   end
 
   def poll do
@@ -15,24 +15,28 @@ defmodule Context do
   end
 
   def bitmasks do
-    GenServer.call(__MODULE__, :bitmasks)
+    {_, bitmasks} = ContextDB.get_all()
+    bitmasks
   end
 
-  def handle_call(:bitmasks, _from, state = {_, bitmasks}) do
-    {:reply, bitmasks, state}
+  def get_context do
+    {vocab, bitmasks} = ContextDB.get_all()
+    version = map_size(vocab) + map_size(bitmasks)
+    {vocab, bitmasks, version}
   end
 
   def handle_cast(:poll, state) do
-    # Offload pop_all to a Task
     Task.start(fn ->
-      new_state = pop_all(state)
-      GenServer.cast(__MODULE__, {:poll_result, new_state})
+      {vocab, bitmasks} = ContextDB.get_all()
+      new_state = pop_all({vocab, bitmasks})
+      ContextDB.set_all(new_state)
+      GenServer.cast(__MODULE__, :poll_result)
     end)
     {:noreply, state}
   end
 
-  def handle_cast({:poll_result, new_state}, _old_state) do
-    {:noreply, new_state}
+  def handle_cast(:poll_result, state) do
+    {:noreply, state}
   end
 
   defp pop_all({vocab, bitmasks}) do
