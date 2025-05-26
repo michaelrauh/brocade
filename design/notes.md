@@ -29,8 +29,11 @@
     - find the positions of the 1s and decode those to words to get results
     - for each zero, find which subphrase owns the bitmap for that zero and use that subphrase as the remediation
 5. Next 
-    - make the context DB return the data needed to support the feeder
     - make a feeder - make sure it feeds back to work queue on new
     - implement the worker flow
+    - implement e2e tests
 6. Later
+    - make the context DB return the data needed to support the follower
     - implement follower
+    - add an e2e test for remediation
+    - mark a "release"
