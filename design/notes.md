@@ -19,7 +19,6 @@
     - (tricky) - consider making the workers manage the bitsets as a cache
 3. Ortho representation
     - make the seed ortho more minimal
-    - ensure the seed ortho hash is unique (ideally tied to version number)
     - consider smaller data representations 
     - consider splitting apart the counter from the ortho more thoroughly
     - consider exposing a proprty "jagged" and scheduling jagged orthos higher to avoid the "up" free move

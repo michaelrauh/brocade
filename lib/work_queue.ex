@@ -15,7 +15,12 @@ defmodule WorkQueue do
   end
 
   def pop do
-    GenServer.call(__MODULE__, :pop)
+    case GenServer.call(__MODULE__, :pop) do
+      {:ok, receipt, item} ->
+        {:ok, receipt, item}
+      nil ->
+        nil
+    end
   end
 
   def ack(receipt) do

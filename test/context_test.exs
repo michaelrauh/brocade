@@ -137,5 +137,21 @@ defmodule ContextTest do
     assert version == map_size(vocab) + map_size(bitmasks)
   end
 
-  # TODO when it is done polling it posts a seed value
+  test "poll adds a new ortho to the work queue when done" do
+    # Set up initial state
+    vocab = %{"foo" => 0, "bar" => 1}
+    bitmasks = %{["foo"] => 1, ["bar"] => 2, ["foo", "bar"] => 3}
+    ContextDB.set_all({vocab, bitmasks})
+
+    Context.poll()
+
+    version = map_size(vocab) + map_size(bitmasks)
+    eventually(fn ->
+      case WorkQueue.pop() do
+        {:ok, _, {:ortho, ^version}} -> :ok
+        nil -> {:error, "ortho not in queue yet"}
+        _ -> {:error, "unexpected item in queue"}
+      end
+    end)
+  end
 end
