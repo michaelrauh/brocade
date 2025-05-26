@@ -17,25 +17,9 @@
     - consider not having the versions be up to date but only returning stable versions to prevent worker thrash
     - consider making the workers update their bitsets instead of pulling and overwriting
     - (tricky) - consider making the workers manage the bitsets as a cache
-3. Prehashing
-    - subphrases example:
-    a b c d
-
-    subphrases: 
-    a b c d 
-    a b c
-    b c d
-    a b 
-    b c
-    c d 
-
-    mappings:
-    a -> b c d
-    a b -> c d
-    a b c -> d
-
-    a -> b c
-    a b -> c
-
-    Note - it is always just the next thing
-    
+3. Ortho representation
+    - make the seed ortho more minimal
+    - ensure the seed ortho hash is unique (ideally tied to version number)
+    - consider smaller data representations 
+    - consider splitting apart the counter from the ortho more thoroughly
+    - consider exposing a proprty "jagged" and scheduling jagged orthos higher to avoid the "up" free move
