@@ -22,8 +22,17 @@ defmodule Context do
     {:reply, bitmasks, state}
   end
 
-  def handle_cast(:poll, {vocab, bitmasks}) do
-    {:noreply, pop_all({vocab, bitmasks})}
+  def handle_cast(:poll, state) do
+    # Offload pop_all to a Task
+    Task.start(fn ->
+      new_state = pop_all(state)
+      GenServer.cast(__MODULE__, {:poll_result, new_state})
+    end)
+    {:noreply, state}
+  end
+
+  def handle_cast({:poll_result, new_state}, _old_state) do
+    {:noreply, new_state}
   end
 
   defp pop_all({vocab, bitmasks}) do
@@ -37,12 +46,18 @@ defmodule Context do
             pop_all({vocab, bitmasks})
 
           {:subphrase, subphrase} ->
-            front = List.delete_at(subphrase, -1)
+            front = Enum.slice(subphrase, 0, length(subphrase) - 1)
             back = List.last(subphrase)
-            bitmasks = Map.update(bitmasks, front, empty_bitmask(), fn mask ->
-              position = Map.get(vocab, back)
-              mask ||| make_bitmask_for_position(position)
-            end)
+            position = Map.get(vocab, back)
+
+            bitmasks =
+              Map.update(
+                bitmasks,
+                front,
+                make_bitmask_for_position(position),
+                fn mask -> mask ||| make_bitmask_for_position(position) end
+              )
+
             ContextQueue.ack(receipt)
             pop_all({vocab, bitmasks})
         end
