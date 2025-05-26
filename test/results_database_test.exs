@@ -47,4 +47,11 @@ defmodule ResultsDatabaseTest do
     out = ResultsDatabase.get_out_of_date(6)
     assert Enum.any?(out, fn {ortho2, _, v} -> ortho2.id == o.id and v == 5 end)
   end
+
+  test "get_orthos returns all inserted orthos" do
+    o1 = ortho("a")
+    o2 = ortho("b")
+    ResultsDatabase.insert_orthos([o1, o2])
+    assert Enum.sort(ResultsDatabase.get_orthos()) == Enum.sort([o1, o2])
+  end
 end

@@ -31,6 +31,7 @@
 5. Next 
     - make a feeder - make sure it feeds back to work queue on new
     - implement the worker flow
+    - just call the poll method for now
     - implement e2e tests
 6. Later
     - make the context DB return the data needed to support the follower

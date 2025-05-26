@@ -34,6 +34,11 @@ defmodule ResultsDatabase do
     GenServer.cast(__MODULE__, {:update_remediations, remediations, new_version})
   end
 
+  # Get all orthos as a list
+  def get_orthos do
+    GenServer.call(__MODULE__, :get_orthos)
+  end
+
   # Server callbacks
 
   def init(state), do: {:ok, state}
@@ -68,6 +73,10 @@ defmodule ResultsDatabase do
       |> Enum.filter(fn {_, _, v} -> v < version end)
       |> Enum.take(100)
     {:reply, out_of_date, state}
+  end
+
+  def handle_call(:get_orthos, _from, state) do
+    {:reply, Map.values(state.orthos), state}
   end
 
   def handle_cast({:insert_remediations, remediations}, state) do
