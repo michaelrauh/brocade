@@ -37,3 +37,12 @@
     - implement follower
     - add an e2e test for remediation
     - mark a "release"
+7. Queues 
+    - Look in to making the queues more specialized or collapse them. Likely make them typed
+8. Break the program apart
+    - Containerize the whole thing
+    - Containerize the first bit separately
+    - Add RabbitMQ
+    - Add Postgres
+    - Add OTEL
+    - Add Prometheus/Grafana
