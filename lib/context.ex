@@ -31,7 +31,7 @@ defmodule Context do
       new_state = pop_all({vocab, bitmasks})
       ContextDB.set_all(new_state)
       version = map_size(elem(new_state, 0)) + map_size(elem(new_state, 1))
-      WorkQueue.push({:ortho, version})
+      WorkQueue.push({Ortho.new(), version})
       GenServer.cast(__MODULE__, :poll_result)
     end)
     {:noreply, state}

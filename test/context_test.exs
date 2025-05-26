@@ -144,11 +144,11 @@ defmodule ContextTest do
     ContextDB.set_all({vocab, bitmasks})
 
     Context.poll()
-
+    o = Ortho.new()
     version = map_size(vocab) + map_size(bitmasks)
     eventually(fn ->
       case WorkQueue.pop() do
-        {:ok, _, {:ortho, ^version}} -> :ok
+        {:ok, _, {^o, ^version}} -> :ok
         nil -> {:error, "ortho not in queue yet"}
         _ -> {:error, "unexpected item in queue"}
       end
