@@ -25,13 +25,6 @@ pub fn find_intersect_locations_vec_mut(l: &[u64], r: &[u64], locations: &mut Ve
     }
 }
 
-/// Original function that allocates a new vector
-pub fn find_intersect_locations_vec(l: &[u64], r: &[u64]) -> Vec<usize> {
-    let mut locations = Vec::with_capacity(l.len() << 2);
-    find_intersect_locations_vec_mut(l, r, &mut locations);
-    locations
-}
-
 /// Find intersections among multiple arrays, mutating the provided result vector
 pub fn find_intersect_locations_mut(arrays: &[&[u64]], forbidden: &[u64], result: &mut Vec<usize>) {
     result.clear();
