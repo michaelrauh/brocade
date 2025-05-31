@@ -120,15 +120,18 @@ fn bench_string_interner_get_bitset_small_vocab(c: &mut Criterion) {
     
     interner.add_batch(phrases);
     
-    // Test prefixes for lookup
-    let test_prefixes: Vec<Vec<String>> = (0..10)
-        .map(|i| vec![format!("word_{}", i)])
+    // Test prefixes for lookup - convert to indices once
+    let test_prefix_indices: Vec<Vec<usize>> = (0..10)
+        .map(|i| {
+            let prefix_strings = vec![format!("word_{}", i)];
+            interner.strings_to_indices_public(&prefix_strings).unwrap()
+        })
         .collect();
     
     c.bench_function("string_interner_get_bitset_small_vocab", |b| {
         b.iter(|| {
-            for prefix in &test_prefixes {
-                let _ = interner.get_bitset(black_box(prefix));
+            for prefix_indices in &test_prefix_indices {
+                let _ = interner.get_bitset(black_box(prefix_indices));
             }
         });
     });
@@ -147,15 +150,18 @@ fn bench_string_interner_get_bitset_large_vocab(c: &mut Criterion) {
     
     interner.add_batch(phrases);
     
-    // Test prefixes for lookup
-    let test_prefixes: Vec<Vec<String>> = (0..100)
-        .map(|i| vec![format!("prefix_{}", i)])
+    // Test prefixes for lookup - convert to indices once
+    let test_prefix_indices: Vec<Vec<usize>> = (0..100)
+        .map(|i| {
+            let prefix_strings = vec![format!("prefix_{}", i)];
+            interner.strings_to_indices_public(&prefix_strings).unwrap()
+        })
         .collect();
     
     c.bench_function("string_interner_get_bitset_large_vocab", |b| {
         b.iter(|| {
-            for prefix in &test_prefixes {
-                let _ = interner.get_bitset(black_box(prefix));
+            for prefix_indices in &test_prefix_indices {
+                let _ = interner.get_bitset(black_box(prefix_indices));
             }
         });
     });
@@ -176,19 +182,22 @@ fn bench_string_interner_get_bitset_multi_word_prefix(c: &mut Criterion) {
     
     interner.add_batch(phrases);
     
-    // Test 3-word prefixes for lookup
-    let test_prefixes: Vec<Vec<String>> = (0..100)
-        .map(|i| vec![
-            format!("word1_{}", i % 20),
-            format!("word2_{}", i % 30),
-            format!("word3_{}", i % 40),
-        ])
+    // Test 3-word prefixes for lookup - convert to indices once
+    let test_prefix_indices: Vec<Vec<usize>> = (0..100)
+        .map(|i| {
+            let prefix_strings = vec![
+                format!("word1_{}", i % 20),
+                format!("word2_{}", i % 30),
+                format!("word3_{}", i % 40),
+            ];
+            interner.strings_to_indices_public(&prefix_strings).unwrap()
+        })
         .collect();
     
     c.bench_function("string_interner_get_bitset_multi_word_prefix", |b| {
         b.iter(|| {
-            for prefix in &test_prefixes {
-                let _ = interner.get_bitset(black_box(prefix));
+            for prefix_indices in &test_prefix_indices {
+                let _ = interner.get_bitset(black_box(prefix_indices));
             }
         });
     });
@@ -209,18 +218,22 @@ fn bench_string_interner_integration_workflow(c: &mut Criterion) {
     interner.add_batch(phrases);
     
     // Test the full workflow: get multiple bitsets and intersect them
-    // Use prefixes that we know exist based on our data generation
-    let prefix1 = vec!["category_0".to_string(), "subcategory_0".to_string()];
-    let prefix2 = vec!["category_1".to_string(), "subcategory_1".to_string()];
-    let prefix3 = vec!["category_2".to_string(), "subcategory_2".to_string()];
+    // Convert prefixes to indices once
+    let prefix1_strings = vec!["category_0".to_string(), "subcategory_0".to_string()];
+    let prefix2_strings = vec!["category_1".to_string(), "subcategory_1".to_string()];
+    let prefix3_strings = vec!["category_2".to_string(), "subcategory_2".to_string()];
+    
+    let prefix1_indices = interner.strings_to_indices_public(&prefix1_strings).unwrap();
+    let prefix2_indices = interner.strings_to_indices_public(&prefix2_strings).unwrap();
+    let prefix3_indices = interner.strings_to_indices_public(&prefix3_strings).unwrap();
     
     c.bench_function("string_interner_integration_workflow", |b| {
         b.iter(|| {
             // Get bitsets (read operations) - use if let to handle potential None values gracefully
             if let (Some(bitset1), Some(bitset2), Some(bitset3)) = (
-                interner.get_bitset(black_box(&prefix1)),
-                interner.get_bitset(black_box(&prefix2)),
-                interner.get_bitset(black_box(&prefix3))
+                interner.get_bitset(black_box(&prefix1_indices)),
+                interner.get_bitset(black_box(&prefix2_indices)),
+                interner.get_bitset(black_box(&prefix3_indices))
             ) {
                 // Intersect them using BitIntersector
                 let forbidden = vec![0u64; bitset1.len()];

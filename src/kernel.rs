@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 /// Empty struct to hold bit intersection operations
 pub struct BitIntersector;
@@ -178,9 +179,12 @@ impl StringInterner {
     }
 
     /// Process a batch of phrases, adding new vocabulary and updating bitsets
-    pub fn add_batch(&mut self, phrases: Vec<Vec<String>>) {
+    /// Returns a set of prefix keys (as string vectors) that were modified
+    pub fn add_batch(&mut self, phrases: Vec<Vec<String>>) -> HashSet<Vec<String>> {
+        let mut modified_prefixes = HashSet::new();
+        
         if phrases.is_empty() {
-            return;
+            return modified_prefixes;
         }
         
         // Validate all phrases have length >= 2
@@ -201,6 +205,8 @@ impl StringInterner {
         // Grow existing bitsets if we added new words
         if words_added > 0 {
             self.grow_bitsets(words_added);
+            // If we grew bitsets, all existing prefixes were technically modified (resized)
+            // but their meaningful content (set bits) wasn't changed, so we don't track this
         }
         
         // Process each phrase
@@ -216,23 +222,55 @@ impl StringInterner {
             // Get last word index
             let last_word_index = self.word_to_index[last_word];
             
-            // Get or create bitset for this prefix
+            // Check if this prefix already exists and if the bit is already set
             let bitset_len = self.bitset_u64_len();
+            let was_modified = if let Some(existing_bitset) = self.prefix_bitsets.get(&prefix_indices) {
+                // Check if the bit for last_word_index is already set
+                let u64_index = last_word_index / 64;
+                let bit_pos = last_word_index % 64;
+                let bit_mask = 1u64 << bit_pos;
+                
+                // If bit is not already set, this will be a modification
+                (existing_bitset[u64_index] & bit_mask) == 0
+            } else {
+                // New prefix, so it's definitely a modification
+                true
+            };
+            
+            // Get or create bitset for this prefix
             let bitset = self.prefix_bitsets.entry(prefix_indices)
                 .or_insert_with(|| vec![0u64; bitset_len]);
             
             // Set the bit for the last word
             Self::set_bit(bitset, last_word_index);
+            
+            // Track modification if the bitset actually changed
+            if was_modified {
+                modified_prefixes.insert(prefix.to_vec());
+            }
         }
+        
+        modified_prefixes
     }
 
-    /// Get the bitset for a given prefix, returning None if prefix not found
-    pub fn get_bitset(&self, prefix: &[String]) -> Option<&[u64]> {
+    /// Get the bitset for a given prefix using interned indices, returning None if prefix not found
+    pub fn get_bitset(&self, prefix_indices: &[usize]) -> Option<&[u64]> {
+        // Direct HashMap lookup for bitset using indices
+        self.prefix_bitsets.get(prefix_indices).map(|v| v.as_slice())
+    }
+
+    /// Get the bitset for a given prefix using strings, returning None if prefix not found or any word is not in vocabulary
+    pub fn get_bitset_by_strings(&self, prefix: &[String]) -> Option<&[u64]> {
         // Convert prefix strings to indices
         let prefix_indices = self.strings_to_indices(prefix)?;
         
         // HashMap lookup for bitset
         self.prefix_bitsets.get(&prefix_indices).map(|v| v.as_slice())
+    }
+
+    /// Convert a slice of strings to their corresponding indices, returning None if any word is not in vocabulary
+    pub fn strings_to_indices_public(&self, strings: &[String]) -> Option<Vec<usize>> {
+        self.strings_to_indices(strings)
     }
 }
 
@@ -343,14 +381,15 @@ mod tests {
         interner.add_batch(phrases);
         assert_eq!(interner.vocab_size(), 4); // "the", "cat", "dog", "big"
         
-        // Test bitset retrieval
-        let prefix = vec!["the".to_string()];
-        let bitset = interner.get_bitset(&prefix).unwrap();
+        // Test bitset retrieval using indices
+        let prefix_strings = vec!["the".to_string()];
+        let prefix_indices = interner.strings_to_indices_public(&prefix_strings).unwrap();
+        let bitset = interner.get_bitset(&prefix_indices).unwrap();
         assert!(!bitset.is_empty());
         
         // Test non-existent prefix
         let missing_prefix = vec!["missing".to_string()];
-        assert!(interner.get_bitset(&missing_prefix).is_none());
+        assert!(interner.strings_to_indices_public(&missing_prefix).is_none());
     }
 
     #[test]
@@ -364,9 +403,10 @@ mod tests {
         
         interner.add_batch(phrases);
         
-        // Get bitset for prefix "quick"
-        let prefix = vec!["quick".to_string()];
-        let bitset = interner.get_bitset(&prefix).unwrap();
+        // Get bitset for prefix "quick" using indices
+        let prefix_strings = vec!["quick".to_string()];
+        let prefix_indices = interner.strings_to_indices_public(&prefix_strings).unwrap();
+        let bitset = interner.get_bitset(&prefix_indices).unwrap();
         
         // Should have bits set for "brown" and "fox"
         // Exact bit positions depend on word indexing order, but bitset should not be all zeros
@@ -393,9 +433,11 @@ mod tests {
         
         assert!(interner.vocab_size() > initial_vocab_size);
         
-        // All prefixes should still be accessible
-        assert!(interner.get_bitset(&vec!["the".to_string()]).is_some());
-        assert!(interner.get_bitset(&vec!["big".to_string()]).is_some());
+        // All prefixes should still be accessible using indices
+        let the_indices = interner.strings_to_indices_public(&vec!["the".to_string()]).unwrap();
+        let big_indices = interner.strings_to_indices_public(&vec!["big".to_string()]).unwrap();
+        assert!(interner.get_bitset(&the_indices).is_some());
+        assert!(interner.get_bitset(&big_indices).is_some());
     }
 
     #[test]
@@ -410,12 +452,15 @@ mod tests {
         
         interner.add_batch(phrases);
         
-        // Get bitsets for different prefixes
-        let prefix1 = vec!["the".to_string(), "quick".to_string()];
-        let prefix2 = vec!["a".to_string(), "quick".to_string()];
+        // Get bitsets for different prefixes using indices
+        let prefix1_strings = vec!["the".to_string(), "quick".to_string()];
+        let prefix2_strings = vec!["a".to_string(), "quick".to_string()];
         
-        let bitset1 = interner.get_bitset(&prefix1).unwrap();
-        let bitset2 = interner.get_bitset(&prefix2).unwrap();
+        let prefix1_indices = interner.strings_to_indices_public(&prefix1_strings).unwrap();
+        let prefix2_indices = interner.strings_to_indices_public(&prefix2_strings).unwrap();
+        
+        let bitset1 = interner.get_bitset(&prefix1_indices).unwrap();
+        let bitset2 = interner.get_bitset(&prefix2_indices).unwrap();
         
         // Use BitIntersector to find intersections
         let forbidden = vec![0u64; bitset1.len()];
@@ -423,6 +468,47 @@ mod tests {
         
         // Should find intersection where both prefixes lead to "brown"
         assert!(!intersections.is_empty());
+    }
+
+    #[test]
+    fn string_interner_change_detection() {
+        let mut interner = StringInterner::new();
+        
+        // First batch - all new prefixes
+        let batch1 = vec![
+            vec!["the".to_string(), "cat".to_string()],
+            vec!["big".to_string(), "dog".to_string()],
+        ];
+        let changes1 = interner.add_batch(batch1);
+        
+        // Should detect both prefixes as modified (new)
+        assert_eq!(changes1.len(), 2);
+        assert!(changes1.contains(&vec!["the".to_string()]));
+        assert!(changes1.contains(&vec!["big".to_string()]));
+        
+        // Second batch - mix of existing and new data
+        let batch2 = vec![
+            vec!["the".to_string(), "cat".to_string()], // Duplicate - no change
+            vec!["the".to_string(), "dog".to_string()], // New completion for existing prefix
+            vec!["small".to_string(), "cat".to_string()], // New prefix
+        ];
+        let changes2 = interner.add_batch(batch2);
+        
+        // Should only detect prefixes that actually changed
+        assert_eq!(changes2.len(), 2);
+        assert!(changes2.contains(&vec!["the".to_string()])); // Got new completion "dog"
+        assert!(changes2.contains(&vec!["small".to_string()])); // New prefix
+        assert!(!changes2.contains(&vec!["big".to_string()])); // Unchanged
+        
+        // Third batch - only duplicates
+        let batch3 = vec![
+            vec!["the".to_string(), "cat".to_string()],
+            vec!["the".to_string(), "dog".to_string()],
+        ];
+        let changes3 = interner.add_batch(batch3);
+        
+        // Should detect no changes
+        assert!(changes3.is_empty());
     }
 }
 
